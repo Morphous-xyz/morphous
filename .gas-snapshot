@@ -1,0 +1,5 @@
+ZapTest:testDepositToLocker() (gas: 273221)
+ZapTest:testGetQuoteHelper() (gas: 19660)
+ZapTest:testSwapAndDepositIntoLocker() (gas: 235525)
+ZapTest:testSwapETHWithParaswap() (gas: 163441)
+ZapTest:testSwapToETHWithParaswap() (gas: 338069)
