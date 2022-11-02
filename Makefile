@@ -7,5 +7,6 @@ ETHERSCAN_API_KEY?=${ETHERSCAN_KEY}
 
 default:; @forge fmt && forge build
 test:; @forge test
+test-gas-report:; @forge test --gas-report
 
 .PHONY: build test snapshot quote

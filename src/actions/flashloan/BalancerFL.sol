@@ -30,7 +30,7 @@ contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
             abi.decode(_userData, (address, address, uint256, bytes[]));
 
         IDSProxy(proxy).execute{value: address(this).balance}(
-            neo, abi.encodeWithSignature("executeAfterFlashLoan(uint256,bytes[])", deadline, data)
+            neo, abi.encodeWithSignature("callBackFlashloan(uint256,bytes[])", deadline, data)
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {

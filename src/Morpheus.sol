@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 
 import {Constants} from "src/libraries/Constants.sol";
-import {FlashLoan} from "src/actions/flashloan/FlashLoan.sol";
 import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
 
 /// @notice Free from the matrix.
@@ -74,7 +73,7 @@ contract Morpheus is MorphoRouter {
         }
     }
 
-    function hello() public pure returns (string memory) {
+    function hello() public view returns (string memory) {
         return "Hello, world!";
     }
 

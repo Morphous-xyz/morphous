@@ -36,11 +36,12 @@ contract MorpheousTest is Test {
 
     function testFlashLoanBalancer() public {
         // Flashloan _userData.
+        address _neo = address(neo);
         address _proxy = address(proxy);
         uint256 _deadline = block.timestamp + 15;
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encodeWithSignature("hello()");
-        bytes memory _flashLoanData = abi.encode(address(neo), _proxy, _deadline, _calldata);
+        bytes memory _flashLoanData = abi.encode(_neo, _proxy, _deadline, _calldata);
 
         // Flashlaon functions parameters.
         address[] memory _tokens = new address[](1);
@@ -51,7 +52,6 @@ contract MorpheousTest is Test {
         bytes memory _proxyData =
             abi.encodeWithSignature("executeFlashloan(address[],uint256[],bytes)", _tokens, _amounts, _flashLoanData);
 
-        /// Morpheus function call.
         proxy.execute(address(neo), _proxyData);
     }
 }

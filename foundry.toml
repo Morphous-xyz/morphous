@@ -1,4 +1,4 @@
 [profile.default]
-verbosity = 3
+verbosity = 4
 fuzz-runs = 10_000
 optimizers_runs = 24_000

@@ -22,9 +22,9 @@ contract Neo is ProxyPermission {
     IMorpheus internal immutable _MORPHEUS;
     IFlashLoanBalancer internal immutable _FLASH_LOAN;
 
-    constructor(address _morpho, address _flashLoan) {
-        _MORPHEUS = IMorpheus(_morpho);
+    constructor(address _morpheus, address _flashLoan) {
         _FLASH_LOAN = IFlashLoanBalancer(_flashLoan);
+        _MORPHEUS = IMorpheus(_morpheus);
     }
 
     function executeFlashloan(address[] calldata tokens, uint256[] calldata amounts, bytes calldata data)
@@ -38,8 +38,8 @@ contract Neo is ProxyPermission {
         _togglePermission(address(_FLASH_LOAN), false);
     }
 
-    function executeAfterFlashLoan(uint256 _deadline, bytes[] calldata _data) external {
-        _MORPHEUS.multicall(_deadline, _data);
+    function callBackFlashloan(uint256 deadline, bytes[] calldata data) external payable {
+        IMorpheus(_MORPHEUS).multicall(deadline, data);
     }
 
     receive() external payable {}
