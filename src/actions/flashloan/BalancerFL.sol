@@ -13,6 +13,12 @@ import {IFlashLoanRecipient} from "src/interfaces/IFlashLoanRecipient.sol";
 contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
     using SafeTransferLib for ERC20;
 
+    address immutable _MORPHEUS;
+
+    constructor(address morpheus) {
+        _MORPHEUS = morpheus;
+    }
+
     function flashLoanBalancer(address[] memory _tokens, uint256[] memory _amounts, bytes calldata _data) external {
         IFlashLoan(Constants._BALANCER_VAULT).flashLoan(address(this), _tokens, _amounts, _data);
     }
@@ -26,11 +32,14 @@ contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
     ) external override nonReentrant {
         if (msg.sender != Constants._BALANCER_VAULT) revert Constants.INVALID_LENDER();
 
-        (address neo, address proxy, uint256 deadline, bytes[] memory data) =
-            abi.decode(_userData, (address, address, uint256, bytes[]));
+        (address proxy, uint256 deadline, bytes[] memory data) = abi.decode(_userData, (address, uint256, bytes[]));
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            ERC20(_tokens[i]).safeTransfer(proxy, _amounts[i]);
+        }
 
         IDSProxy(proxy).execute{value: address(this).balance}(
-            neo, abi.encodeWithSignature("callBackFlashloan(uint256,bytes[])", deadline, data)
+            _MORPHEUS, abi.encodeWithSignature("multicall(uint256,bytes[])", deadline, data)
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {

@@ -38,6 +38,9 @@ library Constants {
     /// @dev Error message when the caller is not allowed to call the function.
     error INVALID_LENDER();
 
+    /// @dev Error message when the caller is not allowed to call the function.
+    error INVALID_MARKET();
+
     /// @dev Error message when the deadline has passed.
     error DEADLINE_EXCEEDED();
 
