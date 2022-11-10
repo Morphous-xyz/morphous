@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import {console} from "forge-std/Test.sol";
-
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
@@ -23,9 +21,7 @@ abstract contract MorphoSupplyWithdraw {
     event WithdrawnFor(address indexed token, uint256 amount, address indexed receiver);
 
     modifier onlyValidMarket(address market) {
-        if (market != Constants._MORPHO_AAVE /*|| market != Constants._MORPHO_COMPOUND*/ ) {
-            revert Constants.INVALID_MARKET();
-        }
+        if (market != Constants._MORPHO_AAVE && market != Constants._MORPHO_COMPOUND) revert Constants.INVALID_MARKET();
         _;
     }
 
@@ -54,18 +50,5 @@ abstract contract MorphoSupplyWithdraw {
         IMorpho(market).withdraw(_poolToken, _amount);
 
         emit Withdrawn(_poolToken, _amount);
-    }
-
-    function withdraw(address market, address _poolToken, uint256 _amount, address _receiver)
-        external
-        onlyValidMarket(market)
-    {
-        IMorpho(market).withdraw(_poolToken, _amount, _receiver);
-
-        emit WithdrawnFor(_poolToken, _amount, _receiver);
-    }
-
-    function transfer(address token, address receiver, uint256 amount) external {
-        ERC20(token).safeTransfer(receiver, amount);
     }
 }

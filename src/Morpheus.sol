@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import "forge-std/Test.sol";
-
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
+import {TokenActions} from "src/actions/TokenActions.sol";
 import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
 
 /// @notice Free from the matrix.
 /// @author @Mutative_
-contract Morpheus is MorphoRouter {
+contract Morpheus is MorphoRouter, TokenActions {
+    /// @notice Address of this contract.
     address public immutable _MORPHEUS;
 
     /// @notice Checks if timestamp is not expired
@@ -38,10 +38,6 @@ contract Morpheus is MorphoRouter {
             bytes32 result = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
             results[i] = result;
         }
-    }
-
-    function hello() public pure returns (string memory) {
-        return "Hello, world!";
     }
 
     receive() external payable {}
