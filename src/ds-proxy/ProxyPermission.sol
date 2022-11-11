@@ -6,9 +6,9 @@ import {IDSGuard} from "src/interfaces/IDSGuard.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {IDSGuardFactory} from "src/interfaces/IDSGuardFactory.sol";
 
-contract ProxyPermission {
+abstract contract ProxyPermission {
     /// @notice DSProxy execute function signature.
-    bytes4 public constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
+    bytes4 internal constant _EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
     /// @notice Called in the context of DSProxy to authorize an address to call on behalf of the DSProxy.
     /// @param _target Address which will be authorized
@@ -21,10 +21,10 @@ contract ProxyPermission {
             IDSAuth(address(this)).setAuthority(address(guard));
         }
 
-        if (_give && !guard.canCall(_target, address(this), EXECUTE_SELECTOR)) {
-            guard.permit(_target, address(this), EXECUTE_SELECTOR);
-        } else if (!_give && guard.canCall(_target, address(this), EXECUTE_SELECTOR)) {
-            guard.forbid(_target, address(this), EXECUTE_SELECTOR);
+        if (_give && !guard.canCall(_target, address(this), _EXECUTE_SELECTOR)) {
+            guard.permit(_target, address(this), _EXECUTE_SELECTOR);
+        } else if (!_give && guard.canCall(_target, address(this), _EXECUTE_SELECTOR)) {
+            guard.forbid(_target, address(this), _EXECUTE_SELECTOR);
         }
     }
 }

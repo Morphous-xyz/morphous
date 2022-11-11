@@ -19,12 +19,15 @@ interface IMorpheus {
 /// @notice Free from the matrix.
 /// @author @Mutative_
 contract Neo is ProxyPermission {
+    /// @notice Morpheus address.
     IMorpheus internal immutable _MORPHEUS;
+
+    /// @notice Balancer Flash loan address.
     IFlashLoanBalancer internal immutable _FLASH_LOAN;
 
     constructor(address _morpheus, address _flashLoan) {
-        _FLASH_LOAN = IFlashLoanBalancer(_flashLoan);
         _MORPHEUS = IMorpheus(_morpheus);
+        _FLASH_LOAN = IFlashLoanBalancer(_flashLoan);
     }
 
     function executeFlashloan(address[] calldata tokens, uint256[] calldata amounts, bytes calldata data)

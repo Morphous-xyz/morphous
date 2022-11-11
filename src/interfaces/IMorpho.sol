@@ -8,4 +8,9 @@ interface IMorpho {
 
     function withdraw(address _poolToken, uint256 _amount) external;
     function withdraw(address _poolToken, uint256 _amount, address _receiver) external;
+
+    function borrow(address _poolToken, uint256 _amount) external;
+    function borrow(address _poolToken, uint256 _maxGasForMatching, uint256 _amount) external;
+
+    function repay(address _poolToken, address _onBehalf, uint256 _amount) external;
 }

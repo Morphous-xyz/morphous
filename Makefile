@@ -6,7 +6,7 @@ FOUNDRY_FORK_BLOCK_NUMBER?=15940879
 ETHERSCAN_API_KEY?=${ETHERSCAN_KEY}
 
 default:; @forge fmt && forge build
-test:; @forge test # --match-test testMorphoSupply
+test:; @forge test  --gas-report # --match-test testMorphoWithdrawCompound 
 test-gas-report:; @forge test --gas-report
 
 .PHONY: build test snapshot quote

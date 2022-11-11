@@ -35,6 +35,7 @@ contract MorpheousTest is Test {
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
+    address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
     function setUp() public {
         morpheous = new Morpheus();
@@ -154,5 +155,54 @@ contract MorpheousTest is Test {
 
         assertEq(_totalBalance, 0);
         assertEq(ERC20(_token).balanceOf(_proxy), 0);
+    }
+
+    function testMorphoSupplyCompound() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_COMPOUND;
+        address _poolToken = Constants._cETHER; // ETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+
+        bytes[] memory _calldata = new bytes[](2);
+        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+        assertApproxEqRel(_totalBalance, _amount, 1e15); // 0.01%
+    }
+
+    function testMorphoWithdrawCompound() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_COMPOUND;
+        address _poolToken = Constants._cETHER; // WETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+
+        bytes[] memory _calldata = new bytes[](4);
+        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[2] =
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[3] = abi.encodeWithSignature("withdrawWETH(uint256)", _amount);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+        assertEq(_totalBalance, 0);
+        assertApproxEqRel(_proxy.balance, _amount, 1e15); // 0.01%
     }
 }
