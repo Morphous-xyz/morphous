@@ -103,7 +103,7 @@ contract MorpheousTest is Test {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
-        assertEq(_totalBalance, _amount);
+        assertApproxEqAbs(_totalBalance, _amount, 1);
     }
 
     function testMorphoWithdraw() public {
@@ -129,8 +129,8 @@ contract MorpheousTest is Test {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
-        assertEq(_totalBalance, 0);
-        assertEq(_proxy.balance, _amount);
+        assertApproxEqAbs(_totalBalance, 0, 1);
+        assertApproxEqAbs(_proxy.balance, _amount, 1);
     }
 
     function testFlashLoanSupplyWithdrawAave() public {
@@ -166,8 +166,8 @@ contract MorpheousTest is Test {
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
 
-        assertEq(_totalBalance, 0);
-        assertEq(ERC20(_token).balanceOf(_proxy), 0);
+        assertApproxEqAbs(_totalBalance, 0, 1);
+        assertApproxEqAbs(ERC20(_token).balanceOf(_proxy), 0, 1);
     }
 
     function testMorphoSupplyBorrow() public {
@@ -222,8 +222,8 @@ contract MorpheousTest is Test {
         (,, uint256 _totalBorrowed) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentBorrowBalanceInOf(_poolToken, _proxy);
 
         assertEq(_totalSupplied, _amount);
-        assertEq(_totalBorrowed, 0);
-        assertEq(ERC20(Constants._WETH).balanceOf(_proxy), 0);
+        assertApproxEqAbs(_totalBorrowed, 0, 1);
+        assertApproxEqAbs(ERC20(Constants._WETH).balanceOf(_proxy), 0, 1);
     }
 
     ////////////////////////////////////////////////////////////////
