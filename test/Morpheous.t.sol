@@ -24,6 +24,11 @@ interface IMorphoLens {
         external
         view
         returns (uint256, uint256, uint256);
+
+    function getCurrentBorrowBalanceInOf(address _token, address _user)
+        external
+        view
+        returns (uint256, uint256, uint256);
 }
 
 contract MorpheousTest is Test {
@@ -48,6 +53,10 @@ contract MorpheousTest is Test {
         assertEq(proxy.owner(), address(this));
     }
 
+    ////////////////////////////////////////////////////////////////
+    /// --- FLASHLOAN
+    ///////////////////////////////////////////////////////////////
+
     function testFlashLoanBalancer() public {
         // Flashloan _userData.
         address _neo = address(neo);
@@ -70,6 +79,10 @@ contract MorpheousTest is Test {
 
         proxy.execute(_neo, _proxyData);
     }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- MORPHO WITHDRAW
+    ///////////////////////////////////////////////////////////////
 
     function testMorphoSupply() public {
         address _proxy = address(proxy);
@@ -120,7 +133,7 @@ contract MorpheousTest is Test {
         assertEq(_proxy.balance, _amount);
     }
 
-    function testFlashLoanSupplyWithdraw() public {
+    function testFlashLoanSupplyWithdrawAave() public {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
@@ -156,6 +169,66 @@ contract MorpheousTest is Test {
         assertEq(_totalBalance, 0);
         assertEq(ERC20(_token).balanceOf(_proxy), 0);
     }
+
+    function testMorphoSupplyBorrow() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_AAVE;
+        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+
+        bytes[] memory _calldata = new bytes[](3);
+        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[2] = abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+        (,, uint256 _totalBorrowed) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentBorrowBalanceInOf(_poolToken, _proxy);
+
+        assertEq(_totalSupplied, _amount);
+        assertEq(_totalBorrowed, _amount / 2);
+        assertEq(ERC20(Constants._WETH).balanceOf(_proxy), _amount / 2);
+    }
+
+    function testMorphoSupplyBorrowRepay() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_AAVE;
+        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+
+        bytes[] memory _calldata = new bytes[](4);
+        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[2] = abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2);
+        _calldata[3] =
+            abi.encodeWithSignature("repay(address,address,address,uint256)", _market, _poolToken, _proxy, _amount / 2);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+        (,, uint256 _totalBorrowed) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentBorrowBalanceInOf(_poolToken, _proxy);
+
+        assertEq(_totalSupplied, _amount);
+        assertEq(_totalBorrowed, 0);
+        assertEq(ERC20(Constants._WETH).balanceOf(_proxy), 0);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- MORPHO COMPOUND
+    ///////////////////////////////////////////////////////////////
 
     function testMorphoSupplyCompound() public {
         address _proxy = address(proxy);

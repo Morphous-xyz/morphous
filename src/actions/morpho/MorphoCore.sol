@@ -14,11 +14,13 @@ interface ICToken {
     function underlying() external view returns (address);
 }
 
-/// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound market.
+/// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
 abstract contract MorphoCore {
-    modifier onlyValidMarket(address market) {
-        if (market != Constants._MORPHO_AAVE && market != Constants._MORPHO_COMPOUND) revert Constants.INVALID_MARKET();
+    modifier onlyValidMarket(address _market) {
+        if (_market != Constants._MORPHO_AAVE && _market != Constants._MORPHO_COMPOUND) {
+            revert Constants.INVALID_MARKET();
+        }
         _;
     }
 
