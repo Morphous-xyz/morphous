@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import "forge-std/Test.sol";
-
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {IFlashLoan} from "src/interfaces/IFlashLoan.sol";
@@ -13,10 +11,10 @@ import {IFlashLoanRecipient} from "src/interfaces/IFlashLoanRecipient.sol";
 contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
     using SafeTransferLib for ERC20;
 
-    address immutable _MORPHEUS;
+    address public immutable MORPHEUS;
 
     constructor(address morpheus) {
-        _MORPHEUS = morpheus;
+        MORPHEUS = morpheus;
     }
 
     function flashLoanBalancer(address[] memory _tokens, uint256[] memory _amounts, bytes calldata _data) external {
@@ -39,7 +37,7 @@ contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
         }
 
         IDSProxy(proxy).execute{value: address(this).balance}(
-            _MORPHEUS, abi.encodeWithSignature("multicall(uint256,bytes[])", deadline, data)
+            MORPHEUS, abi.encodeWithSignature("multicall(uint256,bytes[])", deadline, data)
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
