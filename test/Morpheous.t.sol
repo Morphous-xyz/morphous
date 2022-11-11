@@ -249,7 +249,7 @@ contract MorpheousTest is Test {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
-        assertApproxEqRel(_totalBalance, _amount, 1e15); // 0.01%
+        assertApproxEqRel(_totalBalance, _amount, 1e15); // 0.1%
     }
 
     function testMorphoWithdrawCompound() public {
@@ -276,6 +276,61 @@ contract MorpheousTest is Test {
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         assertEq(_totalBalance, 0);
-        assertApproxEqRel(_proxy.balance, _amount, 1e15); // 0.01%
+        assertApproxEqRel(_proxy.balance, _amount, 1e15); // 0.1%
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- PARASWAP
+    ///////////////////////////////////////////////////////////////
+
+    function testParaswapGetQuote() public {
+        address _proxy = address(proxy);
+        uint256 _amount = 1e18;
+
+        (uint256 quote,) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+        assertGt(quote, 0);
+    }
+
+    function testParaswapSwap() public {
+        address _proxy = address(proxy);
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+
+        bytes[] memory _calldata = new bytes[](1);
+        _calldata[0] = abi.encodeWithSignature(
+            "exchange(address,address,uint256,bytes,address)", Constants._ETH, _DAI, _amount, txData, address(1)
+        );
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        assertApproxEqRel(ERC20(_DAI).balanceOf(_proxy), quote, 1e16); // 1%
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- HELPERS
+    ///////////////////////////////////////////////////////////////
+
+    function getQuote(address srcToken, address dstToken, uint256 amount, address receiver)
+        public
+        returns (uint256 quoteAmount, bytes memory data)
+    {
+        string[] memory inputs = new string[](10);
+        inputs[0] = "python3";
+        inputs[1] = "test/python/get_quote.py";
+        inputs[2] = vm.toString(srcToken);
+        inputs[3] = vm.toString(dstToken);
+        inputs[4] = vm.toString(uint256(18));
+        inputs[5] = vm.toString(uint256(18));
+        inputs[6] = vm.toString(amount);
+        inputs[7] = "SELL";
+        inputs[8] = vm.toString(uint256(1));
+        inputs[9] = vm.toString(receiver);
+
+        return abi.decode(vm.ffi(inputs), (uint256, bytes));
     }
 }

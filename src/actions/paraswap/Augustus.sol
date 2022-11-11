@@ -39,6 +39,10 @@ abstract contract Augustus {
         address recipient
     ) external payable returns (uint256 received) {
         bool success;
+
+        uint256 _before =
+            destToken == Constants._ETH ? address(this).balance : ERC20(destToken).balanceOf(address(this));
+
         if (srcToken == Constants._ETH) {
             (success,) = AUGUSTUS.call{value: underlyingAmount}(callData);
         } else {
@@ -47,17 +51,12 @@ abstract contract Augustus {
         }
         if (!success) revert SWAP_FAILED();
 
-        if (recipient == Constants._MSG_SENDER) {
-            recipient = msg.sender;
-
-            if (destToken == Constants._ETH) {
-                received = address(this).balance;
-                SafeTransferLib.safeTransferETH(recipient, received);
-            } else {
-                received = ERC20(destToken).balanceOf(address(this));
-                TokenUtils._transfer(destToken, recipient, received);
-            }
+        if (destToken == Constants._ETH) {
+            received = address(this).balance - _before;
+        } else {
+            received = ERC20(destToken).balanceOf(address(this)) - _before;
         }
+
         emit ExchangeParaswap(msg.sender, recipient, srcToken, destToken, underlyingAmount, received);
     }
 }
