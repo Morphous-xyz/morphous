@@ -311,6 +311,32 @@ contract MorpheousTest is Test {
         assertApproxEqRel(ERC20(_DAI).balanceOf(_proxy), quote, 1e16); // 1%
     }
 
+    function testParaswapSwapAndSupply() public {
+        address _proxy = address(proxy);
+        uint256 _amount = 1e18;
+
+        address _market = Constants._MORPHO_AAVE;
+        address _poolToken = 0x028171bCA77440897B824Ca71D1c56caC55b68A3; // DAI Market
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+
+        bytes[] memory _calldata = new bytes[](2);
+        _calldata[0] = abi.encodeWithSignature(
+            "exchange(address,address,uint256,bytes,address)", Constants._ETH, _DAI, _amount, txData, address(1)
+        );
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, quote);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+
+        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+
+        (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+        assertEq(_totalSupplied, quote);
+    }
+
     ////////////////////////////////////////////////////////////////
     /// --- HELPERS
     ///////////////////////////////////////////////////////////////
