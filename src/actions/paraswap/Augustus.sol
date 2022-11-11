@@ -22,22 +22,13 @@ abstract contract Augustus {
     /// @notice Paraswap Token pull contract address.
     address public constant TOKEN_TRANSFER_PROXY = 0x216B4B4Ba9F3e719726886d34a177484278Bfcae;
 
-    event ExchangeParaswap(
-        address indexed _from,
-        address indexed _to,
-        address _tokenFrom,
-        address _tokenTo,
-        uint256 _amountFrom,
-        uint256 _amountTo
-    );
+    event ExchangeParaswap(address _tokenFrom, address _tokenTo, uint256 _amountFrom, uint256 _amountTo);
 
-    function exchange(
-        address srcToken,
-        address destToken,
-        uint256 underlyingAmount,
-        bytes memory callData,
-        address recipient
-    ) external payable returns (uint256 received) {
+    function exchange(address srcToken, address destToken, uint256 underlyingAmount, bytes memory callData)
+        external
+        payable
+        returns (uint256 received)
+    {
         bool success;
 
         uint256 _before =
@@ -57,6 +48,6 @@ abstract contract Augustus {
             received = ERC20(destToken).balanceOf(address(this)) - _before;
         }
 
-        emit ExchangeParaswap(msg.sender, recipient, srcToken, destToken, underlyingAmount, received);
+        emit ExchangeParaswap(srcToken, destToken, underlyingAmount, received);
     }
 }

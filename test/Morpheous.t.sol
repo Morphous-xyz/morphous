@@ -275,6 +275,7 @@ contract MorpheousTest is Test {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+
         assertEq(_totalBalance, 0);
         assertApproxEqRel(_proxy.balance, _amount, 1e15); // 0.1%
     }
@@ -300,9 +301,8 @@ contract MorpheousTest is Test {
         (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
 
         bytes[] memory _calldata = new bytes[](1);
-        _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,uint256,bytes,address)", Constants._ETH, _DAI, _amount, txData, address(1)
-        );
+        _calldata[0] =
+            abi.encodeWithSignature("exchange(address,address,uint256,bytes)", Constants._ETH, _DAI, _amount, txData);
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
@@ -323,9 +323,8 @@ contract MorpheousTest is Test {
         (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,uint256,bytes,address)", Constants._ETH, _DAI, _amount, txData, address(1)
-        );
+        _calldata[0] =
+            abi.encodeWithSignature("exchange(address,address,uint256,bytes)", Constants._ETH, _DAI, _amount, txData);
         _calldata[1] =
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, quote);
 
