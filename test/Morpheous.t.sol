@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
+import "test/utils/Utils.sol";
 
 import {Neo} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
@@ -10,30 +11,6 @@ import {Morpheus, Constants} from "src/Morpheus.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {BalancerFL} from "src/actions/flashloan/BalancerFL.sol";
-
-interface MakerRegistry {
-    function build() external returns (address proxy);
-}
-
-interface IPoolToken {
-    function UNDERLYING_ASSET_ADDRESS() external view returns (address);
-}
-
-interface IMorphoLens {
-    function getCurrentSupplyBalanceInOf(address _token, address _user)
-        external
-        view
-        returns (uint256, uint256, uint256);
-
-    function getCurrentBorrowBalanceInOf(address _token, address _user)
-        external
-        view
-        returns (uint256, uint256, uint256);
-}
-
-interface ILido {
-    function submit(address _referral) external payable;
-}
 
 contract MorpheousTest is Test {
     Neo neo;
@@ -347,19 +324,17 @@ contract MorpheousTest is Test {
 
     function getQuote(address srcToken, address dstToken, uint256 amount, address receiver)
         public
-        returns (uint256 quote, bytes memory data)
+        returns (uint256 _quote, bytes memory data)
     {
-        string[] memory inputs = new string[](10);
+        string[] memory inputs = new string[](8);
         inputs[0] = "python3";
         inputs[1] = "test/python/get_quote.py";
         inputs[2] = vm.toString(srcToken);
         inputs[3] = vm.toString(dstToken);
-        inputs[4] = vm.toString(uint256(18));
-        inputs[5] = vm.toString(uint256(18));
-        inputs[6] = vm.toString(amount);
-        inputs[7] = "SELL";
-        inputs[8] = vm.toString(uint256(1));
-        inputs[9] = vm.toString(receiver);
+        inputs[4] = vm.toString(amount);
+        inputs[5] = "SELL";
+        inputs[6] = vm.toString(uint256(1));
+        inputs[7] = vm.toString(receiver);
 
         return abi.decode(vm.ffi(inputs), (uint256, bytes));
     }

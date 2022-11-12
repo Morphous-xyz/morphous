@@ -6,6 +6,6 @@ import {MorphoBorrow} from "src/actions/morpho/MorphoBorrow.sol";
 import {MorphoClaimRewards} from "src/actions/morpho/MorphoClaimRewards.sol";
 import {MorphoSupplyWithdraw} from "src/actions/morpho/MorphoSupplyWithdraw.sol";
 
-/// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound _market.
+/// @notice Morpho Router.
 /// @author @Mutative_
 abstract contract MorphoRouter is Augustus, MorphoBorrow, MorphoClaimRewards, MorphoSupplyWithdraw {}

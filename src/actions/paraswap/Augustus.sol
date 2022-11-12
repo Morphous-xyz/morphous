@@ -5,16 +5,12 @@ import {Constants} from "src/libraries/Constants.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-/// @title Locker Handler
-/// @notice Handle deposit into Liquid Lockers.
+/// @notice Paraswap Exchange Logic.
 abstract contract Augustus {
     using SafeTransferLib for ERC20;
 
     /// @notice Error when swap fails.
     error SWAP_FAILED();
-
-    /// @notice Error when slippage is too high.
-    error NOT_ENOUGHT_RECEIVED();
 
     /// @notice AugustusSwapper contract address.
     address public constant AUGUSTUS = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;

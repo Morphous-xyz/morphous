@@ -21,7 +21,7 @@ contract BalancerFL is ReentrancyGuard, IFlashLoanRecipient {
         IFlashLoan(Constants._BALANCER_VAULT).flashLoan(address(this), _tokens, _amounts, _data);
     }
 
-    /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
+    /// @notice Balancer FL callback function that executes _userData logic through Morpheus.
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,

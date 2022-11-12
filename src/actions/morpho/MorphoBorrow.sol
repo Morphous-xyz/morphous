@@ -7,7 +7,7 @@ import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {MorphoCore} from "src/actions/morpho/MorphoCore.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-/// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound _market.
+/// @notice Borrow a token from a MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
 abstract contract MorphoBorrow is MorphoCore {
     using SafeTransferLib for ERC20;

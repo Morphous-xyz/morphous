@@ -12,7 +12,6 @@ abstract contract MorphoClaimRewards is MorphoCore {
     address internal constant _REWARDS_DISTRIBUTOR = 0x3B14E5C73e0A56D607A8688098326fD4b4292135;
 
     event RewardClaimed(uint256 _claimable);
-
     event MorphoClaimed(address _account, uint256 _claimable);
 
     function claim(address _account, uint256 _claimable, bytes32[] calldata _proof) external {
