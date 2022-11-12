@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import "forge-std/Test.sol";
 import "test/utils/Utils.sol";
 
 import {Neo} from "src/Neo.sol";
@@ -12,14 +11,13 @@ import {Morpheus, Constants} from "src/Morpheus.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {BalancerFL} from "src/actions/flashloan/BalancerFL.sol";
 
-contract StrategiesTest is Test {
+contract StrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Morpheus morpheous;
     BalancerFL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address internal constant _stETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
@@ -50,7 +48,7 @@ contract StrategiesTest is Test {
         _dealSteth(_amount);
         assertApproxEqAbs(ERC20(_stETH).balanceOf(address(this)), _amount, 1); // Wei Corner Case
 
-        (uint256 quote, bytes memory txData) = getQuote(Constants._WETH, _stETH, _toFlashloan, address(_proxy));
+        (uint256 quote, bytes memory txData) = getQuote(Constants._WETH, _stETH, _toFlashloan, address(_proxy), "SELL");
         _leverage(_poolSupplyToken, _poolBorrowToken, _proxy, _amount, _toFlashloan, quote, txData);
 
         (,, uint256 _totalSupplied) =
@@ -61,7 +59,7 @@ contract StrategiesTest is Test {
         assertApproxEqAbs(_totalSupplied, _amount + quote, 1);
         assertApproxEqAbs(_totalBorrowed, _toFlashloan, 1);
 
-        (quote, txData) = getBuyQuote(_stETH, Constants._WETH, _totalBorrowed, address(_proxy));
+        (quote, txData) = getQuote(_stETH, Constants._WETH, _totalBorrowed, address(_proxy), "BUY");
 
         _deleverage(_poolSupplyToken, _poolBorrowToken, _proxy, _totalSupplied, _totalBorrowed, quote, txData);
 
@@ -163,47 +161,5 @@ contract StrategiesTest is Test {
             abi.encodeWithSignature("executeFlashloan(address[],uint256[],bytes)", _tokens, _amounts, _flashLoanData);
 
         proxy.execute(address(neo), _proxyData);
-    }
-
-    ////////////////////////////////////////////////////////////////
-    /// --- HELPERS
-    ///////////////////////////////////////////////////////////////
-
-    function _dealSteth(uint256 _amount) internal {
-        ILido(_stETH).submit{value: _amount}(address(this));
-    }
-
-    function getBuyQuote(address srcToken, address dstToken, uint256 amount, address receiver)
-        public
-        returns (uint256 _quote, bytes memory data)
-    {
-        string[] memory inputs = new string[](8);
-        inputs[0] = "python3";
-        inputs[1] = "test/python/get_quote.py";
-        inputs[2] = vm.toString(srcToken);
-        inputs[3] = vm.toString(dstToken);
-        inputs[4] = vm.toString(amount);
-        inputs[5] = "BUY";
-        inputs[6] = vm.toString(uint256(1));
-        inputs[7] = vm.toString(receiver);
-
-        return abi.decode(vm.ffi(inputs), (uint256, bytes));
-    }
-
-    function getQuote(address srcToken, address dstToken, uint256 amount, address receiver)
-        public
-        returns (uint256 _quote, bytes memory data)
-    {
-        string[] memory inputs = new string[](8);
-        inputs[0] = "python3";
-        inputs[1] = "test/python/get_quote.py";
-        inputs[2] = vm.toString(srcToken);
-        inputs[3] = vm.toString(dstToken);
-        inputs[4] = vm.toString(amount);
-        inputs[5] = "SELL";
-        inputs[6] = vm.toString(uint256(1));
-        inputs[7] = vm.toString(receiver);
-
-        return abi.decode(vm.ffi(inputs), (uint256, bytes));
     }
 }

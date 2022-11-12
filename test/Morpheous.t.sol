@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import "forge-std/Test.sol";
 import "test/utils/Utils.sol";
 
 import {Neo} from "src/Neo.sol";
@@ -12,14 +11,13 @@ import {Morpheus, Constants} from "src/Morpheus.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {BalancerFL} from "src/actions/flashloan/BalancerFL.sol";
 
-contract MorpheousTest is Test {
+contract MorpheousTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Morpheus morpheous;
     BalancerFL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address internal constant _stETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
@@ -269,7 +267,7 @@ contract MorpheousTest is Test {
     function testParaswapGetQuote() public {
         address _proxy = address(proxy);
         uint256 _amount = 1e18;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
         assertGt(quote, 0);
         assertGt(txData.length, 0);
     }
@@ -280,7 +278,7 @@ contract MorpheousTest is Test {
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] =
@@ -302,7 +300,7 @@ contract MorpheousTest is Test {
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
 
         bytes[] memory _calldata = new bytes[](2);
         _calldata[0] =
@@ -315,27 +313,6 @@ contract MorpheousTest is Test {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
-        assertEq(_totalSupplied, quote);
-    }
-
-    ////////////////////////////////////////////////////////////////
-    /// --- HELPERS
-    ///////////////////////////////////////////////////////////////
-
-    function getQuote(address srcToken, address dstToken, uint256 amount, address receiver)
-        public
-        returns (uint256 _quote, bytes memory data)
-    {
-        string[] memory inputs = new string[](8);
-        inputs[0] = "python3";
-        inputs[1] = "test/python/get_quote.py";
-        inputs[2] = vm.toString(srcToken);
-        inputs[3] = vm.toString(dstToken);
-        inputs[4] = vm.toString(amount);
-        inputs[5] = "SELL";
-        inputs[6] = vm.toString(uint256(1));
-        inputs[7] = vm.toString(receiver);
-
-        return abi.decode(vm.ffi(inputs), (uint256, bytes));
+        assertApproxEqAbs(_totalSupplied, quote, 1);
     }
 }

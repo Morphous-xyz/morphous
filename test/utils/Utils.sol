@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
+import "forge-std/Test.sol";
+
 interface MakerRegistry {
     function build() external returns (address proxy);
 }
@@ -23,4 +25,29 @@ interface IMorphoLens {
 
 interface ILido {
     function submit(address _referral) external payable;
+}
+
+abstract contract Utils is Test {
+    address internal constant _stETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
+
+    function _dealSteth(uint256 _amount) internal {
+        ILido(_stETH).submit{value: _amount}(address(this));
+    }
+
+    function getQuote(address srcToken, address dstToken, uint256 amount, address receiver, string memory side)
+        internal
+        returns (uint256 _quote, bytes memory data)
+    {
+        string[] memory inputs = new string[](8);
+        inputs[0] = "python3";
+        inputs[1] = "test/python/get_quote.py";
+        inputs[2] = vm.toString(srcToken);
+        inputs[3] = vm.toString(dstToken);
+        inputs[4] = vm.toString(amount);
+        inputs[5] = side;
+        inputs[6] = vm.toString(uint256(1));
+        inputs[7] = vm.toString(receiver);
+
+        return abi.decode(vm.ffi(inputs), (uint256, bytes));
+    }
 }
