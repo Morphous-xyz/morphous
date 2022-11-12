@@ -31,6 +31,10 @@ interface IMorphoLens {
         returns (uint256, uint256, uint256);
 }
 
+interface ILido {
+    function submit(address _referral) external payable;
+}
+
 contract MorpheousTest is Test {
     Neo neo;
     IDSProxy proxy;
@@ -38,6 +42,7 @@ contract MorpheousTest is Test {
     BalancerFL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address internal constant _stETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
@@ -287,9 +292,9 @@ contract MorpheousTest is Test {
     function testParaswapGetQuote() public {
         address _proxy = address(proxy);
         uint256 _amount = 1e18;
-
-        (uint256 quote,) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy));
         assertGt(quote, 0);
+        assertGt(txData.length, 0);
     }
 
     function testParaswapSwap() public {
@@ -342,7 +347,7 @@ contract MorpheousTest is Test {
 
     function getQuote(address srcToken, address dstToken, uint256 amount, address receiver)
         public
-        returns (uint256 quoteAmount, bytes memory data)
+        returns (uint256 quote, bytes memory data)
     {
         string[] memory inputs = new string[](10);
         inputs[0] = "python3";

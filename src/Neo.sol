@@ -2,12 +2,9 @@
 pragma solidity 0.8.17;
 
 import {Constants} from "src/libraries/Constants.sol";
+import {IMorpheus} from "src/interfaces/IMorpheus.sol";
 import {ProxyPermission} from "src/ds-proxy/ProxyPermission.sol";
 import {IFlashLoanBalancer} from "src/interfaces/IFlashLoan.sol";
-
-interface IMorpheus {
-    function multicall(uint256 deadline, bytes[] calldata data) external payable returns (bytes[] memory results);
-}
 
 /// @notice Free from the matrix.
 /// @author @Mutative_
