@@ -3,6 +3,32 @@
 
 ![Github Actions](https://github.com/kobe-eth/lockers-room/workflows/CI/badge.svg)
 
+## Installation
+
+Install eth_abi:
+
+```bash
+# This is needed in order to run the test. Foundry calls a python script for some test to retrieve Paraswap API calls.
+pip install eth_abi
+```
+Install Foundry:
+```bash
+# This will install Foundryup
+curl -L https://foundry.paradigm.xyz | bash
+# Then Run
+foundryup
+```
+
+Install Dependencies:
+```bash
+forge install
+```
+
+Build:
+```bash
+forge test
+```
+
 # How it works ?
 
 Morphous gives back the power of flash loans to the people. Each user can access a variety of ways to leverage its position and maximise its rewards.
@@ -17,7 +43,7 @@ graph TD
     Morpheus --> Paraswap
 ```
 
-# Three main components
+### Three main components
 
 * `Neo`: Flashloan router. DSProxy delegatecall to this contract in order to take a floashloan.
 * `BalancerFL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
