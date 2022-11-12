@@ -10,12 +10,15 @@ Morphous gives back the power of flash loans to the people. Each user can access
 ```mermaid
 graph TD
 	DSProxy --> delegateCall
-	delegateCall --> FlashLoandHandler
-	FlashLoandHandler --> Balancer
-    delegateCall --> MorphoSupplyHandler
-    MorphoSupplyHandler --> Morpho
-    delegateCall --> MorphoBorrowHandler
-    MorphoBorrowHandler --> Morpho
-    delegateCall --> RewardHandler
-    RewardHandler --> MerkleDistributor
+	delegateCall --> Neo
+	Neo --> Morpheus
+	delegateCall --> Morpheus
+    Morpheus --> Morpho
+    Morpheus --> Paraswap
 ```
+
+# Three main components
+
+* `Neo`: Flashloan router. DSProxy delegatecall to this contract in order to take a floashloan.
+* `BalancerFL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
+* `Morpheus`: Main router that enables to uses Morpho and Paraswap through DSProxy.
