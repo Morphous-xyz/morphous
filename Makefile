@@ -6,6 +6,6 @@ FOUNDRY_ETH_RPC_URL?=https://${NETWORK}.infura.io/v3/${INFURA_KEY}
 ETHERSCAN_API_KEY?=${ETHERSCAN_KEY}
 
 default:; @forge fmt && forge build
-test:; @forge test  --match-test testStETHLeverage
+test:; @forge test
 
 .PHONY: build test snapshot quote
