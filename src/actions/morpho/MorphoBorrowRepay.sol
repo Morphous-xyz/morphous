@@ -9,7 +9,7 @@ import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 /// @notice Borrow a token from a MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
-abstract contract MorphoBorrow is MorphoCore {
+abstract contract MorphoBorrowRepay is MorphoCore {
     using SafeTransferLib for ERC20;
 
     event Borrowed(address indexed token, uint256 amount);

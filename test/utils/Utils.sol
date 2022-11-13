@@ -3,29 +3,11 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-interface MakerRegistry {
-    function build() external returns (address proxy);
-}
-
-interface IPoolToken {
-    function UNDERLYING_ASSET_ADDRESS() external view returns (address);
-}
-
-interface IMorphoLens {
-    function getCurrentSupplyBalanceInOf(address _token, address _user)
-        external
-        view
-        returns (uint256, uint256, uint256);
-
-    function getCurrentBorrowBalanceInOf(address _token, address _user)
-        external
-        view
-        returns (uint256, uint256, uint256);
-}
-
-interface ILido {
-    function submit(address _referral) external payable;
-}
+import {ILido} from "src/interfaces/ILido.sol";
+import {Constants} from "src/libraries/Constants.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
+import {IMakerRegistry} from "test/interfaces/IMakerRegistry.sol";
 
 abstract contract Utils is Test {
     address internal constant _stETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
@@ -45,7 +27,7 @@ abstract contract Utils is Test {
         inputs[3] = vm.toString(dstToken);
         inputs[4] = vm.toString(amount);
         inputs[5] = side;
-        inputs[6] = vm.toString(uint256(1));
+        inputs[6] = vm.toString(block.chainid);
         inputs[7] = vm.toString(receiver);
 
         return abi.decode(vm.ffi(inputs), (uint256, bytes));

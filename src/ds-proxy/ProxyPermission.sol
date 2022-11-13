@@ -13,7 +13,7 @@ abstract contract ProxyPermission {
     /// @notice Called in the context of DSProxy to authorize an address to call on behalf of the DSProxy.
     /// @param _target Address which will be authorized
     function _togglePermission(address _target, bool _give) internal {
-        address currAuthority = address(IDSAuth(address(this)).authority());
+        address currAuthority = IDSAuth(address(this)).authority();
         IDSGuard guard = IDSGuard(currAuthority);
 
         if (currAuthority == address(0)) {

@@ -26,7 +26,7 @@ contract MorpheousTest is Utils {
         morpheous = new Morpheus();
         balancerFL = new BalancerFL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
-        proxy = IDSProxy(MakerRegistry(_MAKER_REGISTRY).build());
+        proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
     }
 
     function testInitialSetup() public {
@@ -48,7 +48,7 @@ contract MorpheousTest is Utils {
         _calldata[0] = abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(balancerFL), _amount);
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata);
 
-        // Flashlaon functions parameters.
+        // Flashloan functions parameters.
         address[] memory _tokens = new address[](1);
         _tokens[0] = _DAI;
         uint256[] memory _amounts = new uint256[](1);
@@ -61,7 +61,7 @@ contract MorpheousTest is Utils {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- MORPHO WITHDRAW
+    /// --- MORPHO AAVE
     ///////////////////////////////////////////////////////////////
 
     function testMorphoSupply() public {

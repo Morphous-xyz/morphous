@@ -3,12 +3,10 @@ pragma solidity 0.8.17;
 
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {MorphoCore} from "src/actions/morpho/MorphoCore.sol";
-
-interface IRewardsDistributor {
-    function claim(address _account, uint256 _claimable, bytes32[] calldata _proof) external;
-}
+import {IRewardsDistributor} from "src/interfaces/IRewardsDistributor.sol";
 
 abstract contract MorphoClaimRewards is MorphoCore {
+    /// @notice Rewards Distributor to claim $MORPHO token.
     address internal constant _REWARDS_DISTRIBUTOR = 0x3B14E5C73e0A56D607A8688098326fD4b4292135;
 
     event RewardClaimed(uint256 _claimable);

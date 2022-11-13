@@ -2,17 +2,11 @@
 pragma solidity 0.8.17;
 
 import {IMorpho} from "src/interfaces/IMorpho.sol";
+import {ICToken} from "src/interfaces/ICToken.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
-
-interface IPoolToken {
-    function UNDERLYING_ASSET_ADDRESS() external view returns (address);
-}
-
-interface ICToken {
-    function underlying() external view returns (address);
-}
 
 /// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
