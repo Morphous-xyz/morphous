@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  FOUNDRY_PROFILE: ci
+  FOUNDRY_ETH_RPC_URL: https://mainnet.infura.io/v3/${{secrets.INFURA_KEY}}
 
 jobs:
   run-ci:
@@ -22,6 +22,6 @@ jobs:
       - name: Install deps
         run: forge install
 
-      # - name: Run tests
-        # run: forge test
-        
+      - name: Run tests
+        run: forge test
+      
