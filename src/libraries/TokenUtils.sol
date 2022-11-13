@@ -11,7 +11,7 @@ library TokenUtils {
     function _approve(address _token, address _to, uint256 _amount) internal {
         if (_token == Constants._ETH) return;
 
-        if (ERC20(_token).allowance(address(this), _to) < _amount) {
+        if (ERC20(_token).allowance(address(this), _to) < _amount || _amount == 0) {
             ERC20(_token).safeApprove(_to, _amount);
         }
     }
