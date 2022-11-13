@@ -49,6 +49,12 @@ library TokenUtils {
     }
 
     function _withdrawWETH(uint256 _amount) internal {
+        uint256 _balance = balanceInOf(Constants._WETH, address(this));
+
+        if (_amount > _balance) {
+            _amount = _balance;
+        }
+
         IWETH(Constants._WETH).withdraw(_amount);
     }
 

@@ -25,12 +25,6 @@ abstract contract TokenActions {
     }
 
     function withdrawWETH(uint256 _amount) external {
-        uint256 _balance = balanceInOf(Constants._WETH, address(this));
-
-        if (_amount > _balance) {
-            _amount = _balance;
-        }
-
         TokenUtils._withdrawWETH(_amount);
     }
 
