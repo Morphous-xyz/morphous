@@ -1,7 +1,7 @@
 <p align="center"> <img src="assets/morphous_logo.svg"></p>
 <p align="center"> Get out of the Matrix and Leverage your positions using Morpho.</p>
 
-![Github Actions](https://github.com/kobe-eth/lockers-room/workflows/CI/badge.svg)
+![Github Actions](https://github.com/Morphous-xyz/morphous/workflows/CI/badge.svg)
 
 ## Installation
 
