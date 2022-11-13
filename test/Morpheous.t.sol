@@ -48,7 +48,7 @@ contract MorpheousTest is Utils {
         _calldata[0] = abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(balancerFL), _amount);
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata);
 
-        // Flashlaon functions parameters.
+        // Flashloan functions parameters.
         address[] memory _tokens = new address[](1);
         _tokens[0] = _DAI;
         uint256[] memory _amounts = new uint256[](1);

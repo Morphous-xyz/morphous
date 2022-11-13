@@ -43,12 +43,12 @@ library Constants {
     /// @dev Error message when the caller is not allowed to call the function.
     error INVALID_LENDER();
 
-    /// @dev Error message when the caller is not allowed to call the function.
+    /// @dev Error message when the market is invalid.
     error INVALID_MARKET();
 
     /// @dev Error message when the deadline has passed.
     error DEADLINE_EXCEEDED();
 
-    /// @dev Error message for when the amount of received tokens is less than the minimum amount
+    /// @dev Error message for when the amount of received tokens is less than the minimum amount.
     error NOT_ENOUGH_RECEIVED();
 }

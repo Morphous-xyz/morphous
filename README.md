@@ -26,7 +26,12 @@ forge install
 
 Build:
 ```bash
-forge test
+forge build
+```
+
+Test:
+```bash
+make test
 ```
 
 # How it works ?
