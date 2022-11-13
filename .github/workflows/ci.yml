@@ -12,7 +12,13 @@ jobs:
   run-ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.7.13'
+
+      - name: Install eth_abi
+        run: pip install eth_abi requests
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
