@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import {IWETH} from "src/interfaces/IWETH.sol";
+import {ILido} from "src/interfaces/ILido.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
@@ -23,9 +24,11 @@ library TokenUtils {
 
         if (_from != address(0) && _from != address(this) && _token != Constants._ETH && _amount != 0) {
             ERC20(_token).safeTransferFrom(_from, address(this), _amount);
+
+            return _amount;
         }
 
-        return _amount;
+        return 0;
     }
 
     function _transfer(address _token, address _to, uint256 _amount) internal returns (uint256) {
@@ -39,9 +42,15 @@ library TokenUtils {
             } else {
                 SafeTransferLib.safeTransferETH(_to, _amount);
             }
+
+            return _amount;
         }
 
-        return _amount;
+        return 0;
+    }
+
+    function _depositSTETH(uint256 _amount) internal {
+        ILido(Constants._stETH).submit{value: _amount}(address(this));
     }
 
     function _depositWETH(uint256 _amount) internal {
@@ -49,7 +58,7 @@ library TokenUtils {
     }
 
     function _withdrawWETH(uint256 _amount) internal {
-        uint256 _balance = balanceInOf(Constants._WETH, address(this));
+        uint256 _balance = _balanceInOf(Constants._WETH, address(this));
 
         if (_amount > _balance) {
             _amount = _balance;

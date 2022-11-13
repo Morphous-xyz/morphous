@@ -26,7 +26,7 @@ contract StrategiesTest is Utils {
         morpheous = new Morpheus();
         balancerFL = new BalancerFL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
-        proxy = IDSProxy(MakerRegistry(_MAKER_REGISTRY).build());
+        proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
     }
 
     function testInitialSetup() public {
