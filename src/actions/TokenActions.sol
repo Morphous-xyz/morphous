@@ -20,6 +20,10 @@ abstract contract TokenActions {
         return TokenUtils._transfer(_token, _to, _amount);
     }
 
+    function depositSTETH(uint256 _amount) external {
+        TokenUtils._depositSTETH(_amount);
+    }
+
     function depositWETH(uint256 _amount) external {
         TokenUtils._depositWETH(_amount);
     }
