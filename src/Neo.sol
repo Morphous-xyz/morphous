@@ -4,8 +4,8 @@ pragma solidity 0.8.17;
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {IMorpheus} from "src/interfaces/IMorpheus.sol";
+import {IFlashLoanHandler} from "src/interfaces/IFlashLoan.sol";
 import {ProxyPermission} from "src/ds-proxy/ProxyPermission.sol";
-import {IFlashLoanBalancer} from "src/interfaces/IFlashLoan.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 
 /// @notice Free from the matrix.
@@ -15,18 +15,18 @@ contract Neo is ProxyPermission {
     IMorpheus internal immutable _MORPHEUS;
 
     /// @notice Balancer Flash loan address.
-    IFlashLoanBalancer internal immutable _FLASH_LOAN;
+    IFlashLoanHandler internal immutable _FLASH_LOAN;
 
     constructor(address _morpheus, address _flashLoan) {
         _MORPHEUS = IMorpheus(_morpheus);
-        _FLASH_LOAN = IFlashLoanBalancer(_flashLoan);
+        _FLASH_LOAN = IFlashLoanHandler(_flashLoan);
     }
     /// @notice Execute a flash loan from Balancer and call a series of actions on _Morpheus through DSProxy.
     /// @param tokens Array of tokens to flashloan.
     /// @param amounts Array of amounts to flashloan.
     /// @param data Data of actions to call on _Morpheus.
 
-    function executeFlashloan(address[] calldata tokens, uint256[] calldata amounts, bytes calldata data)
+    function executeFlashloan(address[] calldata tokens, uint256[] calldata amounts, bytes calldata data, bool isAave)
         external
         payable
     {
@@ -34,7 +34,7 @@ contract Neo is ProxyPermission {
         _togglePermission(address(_FLASH_LOAN), true);
 
         // Execute flash loan.
-        _FLASH_LOAN.flashLoanBalancer(tokens, amounts, data);
+        _FLASH_LOAN.flashLoan(tokens, amounts, data, isAave);
 
         // Remove _FLASH_LOAN permission to call execute on behalf DSProxy.
         _togglePermission(address(_FLASH_LOAN), false);
@@ -70,7 +70,8 @@ contract Neo is ProxyPermission {
         address[] calldata tokens,
         uint256[] calldata amounts,
         bytes calldata data,
-        address receiver
+        address receiver,
+        bool isAave
     ) external payable {
         uint256 length = tokensReceiver.length;
         uint256[] memory balancesBefore = new uint256[](length);
@@ -83,7 +84,7 @@ contract Neo is ProxyPermission {
         _togglePermission(address(_FLASH_LOAN), true);
 
         // Execute flash loan.
-        _FLASH_LOAN.flashLoanBalancer(tokens, amounts, data);
+        _FLASH_LOAN.flashLoan(tokens, amounts, data, isAave);
 
         // Remove _FLASH_LOAN permission to call execute on behalf DSProxy.
         _togglePermission(address(_FLASH_LOAN), false);

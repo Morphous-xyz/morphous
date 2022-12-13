@@ -9,22 +9,23 @@ import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morpheus, Constants} from "src/Morpheus.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {BalancerFL} from "src/actions/flashloan/BalancerFL.sol";
+import {FL} from "src/actions/flashloan/FL.sol";
 
 contract StrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Morpheus morpheous;
-    BalancerFL balancerFL;
+    FL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address public constant AUGUSTUS = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
     function setUp() public {
         morpheous = new Morpheus();
-        balancerFL = new BalancerFL(address(morpheous));
+        balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
     }
@@ -100,7 +101,7 @@ contract StrategiesTest is Utils {
         _amounts[0] = _toFlashloan;
 
         bytes memory _proxyData =
-            abi.encodeWithSignature("executeFlashloan(address[],uint256[],bytes)", _tokens, _amounts, _flashLoanData);
+            abi.encodeWithSignature("executeFlashloan(address[],uint256[],bytes,bool)", _tokens, _amounts, _flashLoanData,false);
 
         proxy.execute{value: _amount}(address(neo), _proxyData);
     }
@@ -126,7 +127,7 @@ contract StrategiesTest is Utils {
         _calldata[1] =
             abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max);
         _calldata[2] = abi.encodeWithSignature(
-            "exchange(address,address,uint256,bytes)", _supplyToken, _borrowToken, _quote, _txData
+            "exchange(address,address,address,uint256,bytes)", AUGUSTUS, _supplyToken, _borrowToken, _quote, _txData
         );
         _calldata[3] = abi.encodeWithSignature(
             "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed
@@ -141,12 +142,13 @@ contract StrategiesTest is Utils {
         _amounts[0] = _totalBorrowed;
 
         bytes memory _proxyData = abi.encodeWithSignature(
-            "executeFlashloanWithReceiver(address[],address[],uint256[],bytes,address)",
+            "executeFlashloanWithReceiver(address[],address[],uint256[],bytes,address,bool)",
             _tokens,
             _tokens,
             _amounts,
             _flashLoanData,
-            address(this)
+            address(this),
+            false
         );
         proxy.execute(address(neo), _proxyData);
     }

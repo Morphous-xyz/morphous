@@ -18,6 +18,9 @@ library Constants {
     /// @notice The address of Morpho Aave markets.
     address internal constant _MORPHO_AAVE = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
 
+    /// @notice Address of Aave Lending Pool contract.
+    address internal constant _AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+
     /// @notice Address of Balancer contract.
     address internal constant _BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
@@ -37,8 +40,14 @@ library Constants {
     /// @dev Error message when the caller is not allowed to call the function.
     error INVALID_LENDER();
 
+    /// @dev Error message when the caller is not allowed to call the function.
+    error INVALID_INITIATOR();
+
     /// @dev Error message when the market is invalid.
     error INVALID_MARKET();
+
+    /// @dev Error message when the market is invalid.
+    error INVALID_AGGREGATOR();
 
     /// @dev Error message when the deadline has passed.
     error DEADLINE_EXCEEDED();
