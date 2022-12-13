@@ -35,8 +35,7 @@ contract Morpheus is MorphoRouter, TokenActions {
     {
         results = new bytes32[](data.length);
         for (uint256 i = 0; i < data.length; i++) {
-            bytes32 result = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
-            results[i] = result;
+            results[i] = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
         }
     }
 

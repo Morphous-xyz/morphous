@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "test/utils/Utils.sol";
 
-import {Neo} from "src/Neo.sol";
+import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morpheus, Constants} from "src/Morpheus.sol";
@@ -113,6 +113,40 @@ contract MorpheousTest is Utils {
         assertApproxEqAbs(_proxy.balance, _amount, 1);
     }
 
+    function testMorphoWithdrawWithReceiver() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_AAVE;
+        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+
+        bytes[] memory _calldata = new bytes[](3);
+        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[2] =
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount);
+
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
+
+        address[] memory tokens = new address[](1);
+        tokens[0] = Constants._WETH;
+
+        bytes memory _neoData =
+            abi.encodeWithSignature("executeWithReceiver(address[],bytes,address)", tokens, _proxyData, address(this));
+
+        proxy.execute{value: _amount}(address(neo), _neoData);
+
+        (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+
+        assertApproxEqAbs(_totalBalance, 0, 1);
+        assertEq(TokenUtils._balanceInOf(Constants._WETH, _proxy), 0);
+        assertEq(TokenUtils._balanceInOf(Constants._WETH, address(this)), _amount);
+    }
+
     function testFlashLoanSupplyWithdrawAave() public {
         address _proxy = address(proxy);
         // Supply _userData.
@@ -148,6 +182,55 @@ contract MorpheousTest is Utils {
 
         assertApproxEqAbs(_totalBalance, 0, 1);
         assertApproxEqAbs(ERC20(_token).balanceOf(_proxy), 0, 1);
+    }
+
+    function testFlashLoanSupplyWithdrawAaveWithReceiver() public {
+        address _proxy = address(proxy);
+        // Supply _userData.
+        address _market = Constants._MORPHO_AAVE;
+        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        uint256 _amount = 1e18;
+
+        // Flashloan _userData.
+        uint256 _deadline = block.timestamp + 15;
+        address _token = IPoolToken(_poolToken).UNDERLYING_ASSET_ADDRESS(); // WETH
+
+        deal(_token, address(this), _amount);
+        ERC20(_token).approve(_proxy, _amount);
+
+        bytes[] memory _calldata = new bytes[](4);
+        _calldata[0] = abi.encodeWithSignature("transferFrom(address,address,uint256)", _token, address(this), _amount);
+        _calldata[1] =
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount * 2);
+        _calldata[2] =
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, type(uint256).max);
+        _calldata[3] =
+            abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(balancerFL), _amount);
+
+        bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata);
+
+        // Flashlaon functions parameters.
+        address[] memory _tokens = new address[](1);
+        _tokens[0] = _token;
+        uint256[] memory _amounts = new uint256[](1);
+        _amounts[0] = _amount;
+
+        bytes memory _proxyData = abi.encodeWithSignature(
+            "executeFlashloanWithReceiver(address[],address[],uint256[],bytes,address)",
+            _tokens,
+            _tokens,
+            _amounts,
+            _flashLoanData,
+            address(this)
+        );
+
+        proxy.execute(address(neo), _proxyData);
+
+        (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
+
+        assertApproxEqAbs(_totalBalance, 0, 1);
+        assertEq(TokenUtils._balanceInOf(_token, _proxy), 0);
+        assertEq(TokenUtils._balanceInOf(_token, address(this)), _amount);
     }
 
     function testMorphoSupplyBorrow() public {
