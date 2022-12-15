@@ -6,10 +6,10 @@ import "test/utils/Utils.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
+import {FL} from "src/actions/flashloan/FL.sol";
 import {Morpheus, Constants} from "src/Morpheus.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {FL} from "src/actions/flashloan/FL.sol";
 
 contract MorpheousTest is Utils {
     Neo neo;

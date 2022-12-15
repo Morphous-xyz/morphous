@@ -100,8 +100,9 @@ contract StrategiesTest is Utils {
         uint256[] memory _amounts = new uint256[](1);
         _amounts[0] = _toFlashloan;
 
-        bytes memory _proxyData =
-            abi.encodeWithSignature("executeFlashloan(address[],uint256[],bytes,bool)", _tokens, _amounts, _flashLoanData,false);
+        bytes memory _proxyData = abi.encodeWithSignature(
+            "executeFlashloan(address[],uint256[],bytes,bool)", _tokens, _amounts, _flashLoanData, false
+        );
 
         proxy.execute{value: _amount}(address(neo), _proxyData);
     }

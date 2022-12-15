@@ -24,6 +24,9 @@ library Constants {
     /// @notice Address of Balancer contract.
     address internal constant _BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
+    /// @notice Address of DefiSaver FL Fee Faucet contract.
+    address internal constant _FEE_FAUCET = 0x47f159C90850D5cE09E21F931d504536840f34b4;
+
     /// @notice The address of Morpho Compound markets.
     address internal constant _MORPHO_COMPOUND = 0x8888882f8f843896699869179fB6E4f7e3B58888;
 

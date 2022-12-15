@@ -8,27 +8,27 @@ import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 abstract contract TokenActions {
     using SafeTransferLib for ERC20;
 
-    function approveToken(address _token, address _to, uint256 _amount) external {
+    function approveToken(address _token, address _to, uint256 _amount) public {
         TokenUtils._approve(_token, _to, _amount);
     }
 
-    function transferFrom(address _token, address _from, uint256 _amount) external returns (uint256) {
+    function transferFrom(address _token, address _from, uint256 _amount) public returns (uint256) {
         return TokenUtils._transferFrom(_token, _from, _amount);
     }
 
-    function transfer(address _token, address _to, uint256 _amount) external returns (uint256) {
+    function transfer(address _token, address _to, uint256 _amount) public returns (uint256) {
         return TokenUtils._transfer(_token, _to, _amount);
     }
 
-    function depositSTETH(uint256 _amount) external {
+    function depositSTETH(uint256 _amount) public {
         TokenUtils._depositSTETH(_amount);
     }
 
-    function depositWETH(uint256 _amount) external {
+    function depositWETH(uint256 _amount) public {
         TokenUtils._depositWETH(_amount);
     }
 
-    function withdrawWETH(uint256 _amount) external {
+    function withdrawWETH(uint256 _amount) public {
         TokenUtils._withdrawWETH(_amount);
     }
 
