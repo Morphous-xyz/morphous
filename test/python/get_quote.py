@@ -12,16 +12,14 @@ def get_quote(
         "amount": amount,
         "side": side,
         "network": network,
+        "excludeDEXS": "Balancer, MultiPath, MegaPath",
+        "excludeContractMethods": "megaSwap, multiSwap"
     }
 
     url = API_URL + "/prices/"
     price_route = requests.get(url, params=queryParams).json()
 
-    dest_amount = (
-        price_route["priceRoute"]["destAmount"]
-        if side == "SELL"
-        else price_route["priceRoute"]["srcAmount"]
-    )
+    dest_amount = price_route["priceRoute"]["destAmount"] if side == "SELL" else price_route["priceRoute"]["srcAmount"]
 
     queryParams = {
         "priceRoute": price_route["priceRoute"],
