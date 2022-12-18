@@ -45,11 +45,11 @@ graph TD
 	Neo --> Morpheus
 	delegateCall --> Morpheus
     Morpheus --> Morpho
-    Morpheus --> Paraswap
+    Morpheus --> Exchanges
 ```
 
 ### Three main components
 
 * `Neo`: Flashloan router. DSProxy delegatecall to this contract in order to take a floashloan.
-* `BalancerFL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
+* `FL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
 * `Morpheus`: Main router that enables to uses Morpho and Paraswap through DSProxy.
