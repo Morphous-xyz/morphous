@@ -52,4 +52,4 @@ graph TD
 
 * `Neo`: Flashloan router. DSProxy delegatecall to this contract in order to take a floashloan.
 * `FL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
-* `Morpheus`: Main router that enables to uses Morpho and Paraswap through DSProxy.
+* `Morpheus`: Main router that enables to uses Morpho and Aggregators like Paraswap/1nch through DSProxy.
