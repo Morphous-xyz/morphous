@@ -18,7 +18,7 @@ interface IFlashLoanRecipient {
         bytes memory userData
     ) external;
 
-    /// @notice Aave FL callback function that executes _userData logic through Morpheus.
+    /// @notice Aave FL callback function that executes _userData logic through Morphous.
     function executeOperation(
         address[] memory _tokens,
         uint256[] memory _amounts,

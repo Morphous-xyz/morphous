@@ -24,7 +24,7 @@ abstract contract Aggregators {
     event ExchangeAggregator(address _tokenFrom, address _tokenTo, uint256 _amountFrom, uint256 _amountTo);
 
     modifier onlyValidAggregator(address _aggregator) {
-        _checkAggregator(_aggregator);
+        if (_aggregator != AUGUSTUS && _aggregator != INCH_ROUTER) revert Constants.INVALID_AGGREGATOR();
         _;
     }
 
@@ -36,8 +36,7 @@ abstract contract Aggregators {
         bytes memory callData
     ) external payable onlyValidAggregator(aggregator) returns (uint256 received) {
         bool success;
-        uint256 _before =
-            destToken == Constants._ETH ? address(this).balance : ERC20(destToken).balanceOf(address(this));
+        uint256 before = destToken == Constants._ETH ? address(this).balance : ERC20(destToken).balanceOf(address(this));
 
         if (srcToken == Constants._ETH) {
             (success,) = aggregator.call{value: underlyingAmount}(callData);
@@ -48,15 +47,11 @@ abstract contract Aggregators {
         if (!success) revert SWAP_FAILED();
 
         if (destToken == Constants._ETH) {
-            received = address(this).balance - _before;
+            received = address(this).balance - before;
         } else {
-            received = ERC20(destToken).balanceOf(address(this)) - _before;
+            received = ERC20(destToken).balanceOf(address(this)) - before;
         }
 
         emit ExchangeAggregator(srcToken, destToken, underlyingAmount, received);
-    }
-
-    function _checkAggregator(address _aggregator) internal pure {
-        if (_aggregator != AUGUSTUS && _aggregator != INCH_ROUTER) revert Constants.INVALID_AGGREGATOR();
     }
 }

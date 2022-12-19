@@ -6,10 +6,10 @@ import {Constants} from "src/libraries/Constants.sol";
 import {TokenActions} from "src/actions/TokenActions.sol";
 import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
 
-/// @title Morpheus
+/// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morpheus is MorphoRouter, TokenActions {
+contract Morphous is MorphoRouter, TokenActions {
     /// @notice Address of this contract.
     address public immutable _MORPHEUS;
 

@@ -9,10 +9,10 @@ import {IFlashLoanHandler} from "src/interfaces/IFlashLoan.sol";
 import {ProxyPermission} from "src/ds-proxy/ProxyPermission.sol";
 
 /// @title Neo
-/// @notice Utility contract to execute flash loans and call a series of actions on Morpheus through DSProxy.
+/// @notice Utility contract to execute flash loans and call a series of actions on Morphous through DSProxy.
 /// @author @Mutative_
 contract Neo is ProxyPermission {
-    /// @notice Morpheus address.
+    /// @notice Morphous address.
     IMorpheus internal immutable _MORPHEUS;
 
     /// @notice Balancer Flash loan address.
@@ -23,10 +23,10 @@ contract Neo is ProxyPermission {
         _FLASH_LOAN = IFlashLoanHandler(_flashLoan);
     }
 
-    /// @notice Execute a flash loan and call a series of actions on _Morpheus through DSProxy.
+    /// @notice Execute a flash loan and call a series of actions on _Morphous through DSProxy.
     /// @param tokens Array of tokens to flashloan.
     /// @param amounts Array of amounts to flashloan.
-    /// @param data Data of actions to call on _Morpheus.
+    /// @param data Data of actions to call on _Morphous.
     function executeFlashloan(address[] calldata tokens, uint256[] calldata amounts, bytes calldata data, bool isAave)
         external
         payable
@@ -41,9 +41,9 @@ contract Neo is ProxyPermission {
         _togglePermission(address(_FLASH_LOAN), false);
     }
 
-    /// @notice Execute a flash loan from and call a series of actions on _Morpheus through DSProxy.
+    /// @notice Execute a series of actions on _Morphous through DSProxy.
     /// @param tokens Array of tokens to flashloan.
-    /// @param data Data of actions to call on _Morpheus.
+    /// @param data Data of actions to call on _Morphous.
     /// @param receiver Address to receive token if needed.
     function executeWithReceiver(address[] calldata tokens, bytes calldata data, address receiver) external payable {
         uint256 length = tokens.length;
@@ -62,10 +62,11 @@ contract Neo is ProxyPermission {
         }
     }
 
-    /// @notice Execute a flash loan from and call a series of actions on _Morpheus through DSProxy.
+    /// @notice Execute a flash loan from and call a series of actions on _Morphous through DSProxy.
+    /// @param tokensReceiver Array of tokens to transfer to receiver.
     /// @param tokens Array of tokens to flashloan.
     /// @param amounts Array of amounts to flashloan.
-    /// @param data Data of actions to call on _Morpheus.
+    /// @param data Data of actions to call on _Morphous.
     /// @param receiver Address to receive token if needed.
     function executeFlashloanWithReceiver(
         address[] calldata tokensReceiver,

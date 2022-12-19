@@ -6,7 +6,7 @@ import "test/utils/Utils.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {Morpheus, Constants} from "src/Morpheus.sol";
+import {Morphous, Constants} from "src/Morphous.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/actions/flashloan/FL.sol";
@@ -14,7 +14,7 @@ import {FL} from "src/actions/flashloan/FL.sol";
 contract StrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
-    Morpheus morpheous;
+    Morphous morpheous;
     FL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -24,7 +24,7 @@ contract StrategiesTest is Utils {
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
     function setUp() public {
-        morpheous = new Morpheus();
+        morpheous = new Morphous();
         balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
@@ -79,7 +79,7 @@ contract StrategiesTest is Utils {
 
         address _borrowToken = IPoolToken(_poolBorrowToken).UNDERLYING_ASSET_ADDRESS();
 
-        /// Morpheus calldata.
+        /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](5);
         _calldata[0] = abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan);
         _calldata[1] = abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan);
@@ -120,7 +120,7 @@ contract StrategiesTest is Utils {
         address _supplyToken = IPoolToken(_poolSupplyToken).UNDERLYING_ASSET_ADDRESS();
         address _borrowToken = IPoolToken(_poolBorrowToken).UNDERLYING_ASSET_ADDRESS();
 
-        /// Morpheus calldata.
+        /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](4);
         _calldata[0] = abi.encodeWithSignature(
             "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
