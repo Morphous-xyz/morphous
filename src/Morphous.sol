@@ -6,9 +6,10 @@ import {Constants} from "src/libraries/Constants.sol";
 import {TokenActions} from "src/actions/TokenActions.sol";
 import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
 
-/// @notice Free from the matrix.
+/// @title Morphous
+/// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morpheus is MorphoRouter, TokenActions {
+contract Morphous is MorphoRouter, TokenActions {
     /// @notice Address of this contract.
     address public immutable _MORPHEUS;
 
@@ -35,8 +36,7 @@ contract Morpheus is MorphoRouter, TokenActions {
     {
         results = new bytes32[](data.length);
         for (uint256 i = 0; i < data.length; i++) {
-            bytes32 result = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
-            results[i] = result;
+            results[i] = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
         }
     }
 

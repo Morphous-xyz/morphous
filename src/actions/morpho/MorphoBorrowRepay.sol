@@ -5,13 +5,10 @@ import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {MorphoCore} from "src/actions/morpho/MorphoCore.sol";
-import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 /// @notice Borrow a token from a MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
 abstract contract MorphoBorrowRepay is MorphoCore {
-    using SafeTransferLib for ERC20;
-
     event Borrowed(address indexed token, uint256 amount);
     event BorrowedWithMaxGas(address indexed token, uint256 amount, uint256 maxGas);
 
