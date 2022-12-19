@@ -42,30 +42,14 @@ Morphous gives back the power of flash loans to the people. Each user can access
 graph TD
 	DSProxy --> delegateCall
 	delegateCall --> Neo
-<<<<<<< HEAD
 	Neo --> Morpheus
 	delegateCall --> Morpheus
     Morpheus --> Morpho
     Morpheus --> Exchanges
-=======
-	Neo --> Morphous
-	delegateCall --> Morphous
-    Morphous --> Morpho
-    Morphous --> Paraswap
->>>>>>> a8620b9 (refactor: fix pr comments)
 ```
 
 ### Three main components
 
 * `Neo`: Flashloan router. DSProxy delegatecall to this contract in order to take a floashloan.
-<<<<<<< HEAD
 * `FL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morpheus actions.
-<<<<<<< HEAD
 * `Morpheus`: Main router that enables to uses Morpho and Aggregators like Paraswap/1nch through DSProxy.
-=======
-* `Morpheus`: Main router that enables to uses Morpho and Paraswap through DSProxy.
->>>>>>> 60f3dde (feat: add receiver + 1nch router + aave fl)
-=======
-* `FL`:  Flashloan Recipient. Transfers the flashloaned tokens to DSProxy and execute through Morphous actions.
-* `Morphous`: Main router that enables to uses Morpho and Paraswap through DSProxy.
->>>>>>> a8620b9 (refactor: fix pr comments)
