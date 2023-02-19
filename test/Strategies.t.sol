@@ -18,7 +18,7 @@ contract StrategiesTest is Utils {
     FL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant AUGUSTUS = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
+    address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
@@ -128,7 +128,12 @@ contract StrategiesTest is Utils {
         _calldata[1] =
             abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max);
         _calldata[2] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", AUGUSTUS, _supplyToken, _borrowToken, _quote, _txData
+            "exchange(address,address,address,uint256,bytes)",
+            ZERO_EX_ROUTER,
+            _supplyToken,
+            _borrowToken,
+            _quote,
+            _txData
         );
         _calldata[3] = abi.encodeWithSignature(
             "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed

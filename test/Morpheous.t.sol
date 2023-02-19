@@ -18,7 +18,7 @@ contract MorpheousTest is Utils {
     FL fl;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant AUGUSTUS = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
+    address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
     address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
@@ -374,10 +374,10 @@ contract MorpheousTest is Utils {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- PARASWAP
+    /// --- AGGREGATORS
     ///////////////////////////////////////////////////////////////
 
-    function testParaswapGetQuote() public {
+    function testGetQuote() public {
         address _proxy = address(proxy);
         uint256 _amount = 1e18;
         (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
@@ -385,7 +385,7 @@ contract MorpheousTest is Utils {
         assertGt(txData.length, 0);
     }
 
-    function testParaswapSwap() public {
+    function testSwap() public {
         address _proxy = address(proxy);
         uint256 _amount = 1e18;
 
@@ -395,7 +395,7 @@ contract MorpheousTest is Utils {
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", AUGUSTUS, Constants._ETH, _DAI, _amount, txData
+            "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
         );
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
@@ -405,7 +405,7 @@ contract MorpheousTest is Utils {
         assertApproxEqRel(ERC20(_DAI).balanceOf(_proxy), quote, 1e16); // 1%
     }
 
-    function testParaswapSwapAndSupply() public {
+    function testSwapAndSupply() public {
         address _proxy = address(proxy);
         uint256 _amount = 1e18;
 
@@ -418,7 +418,7 @@ contract MorpheousTest is Utils {
 
         bytes[] memory _calldata = new bytes[](2);
         _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", AUGUSTUS, Constants._ETH, _DAI, _amount, txData
+            "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
         );
         _calldata[1] =
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, quote);
