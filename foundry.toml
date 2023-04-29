@@ -3,3 +3,8 @@ verbosity = 3
 fuzz-runs = 10_000
 optimizers_runs = 24_000
 ffi = true
+
+remappings = [
+    'solmate=lib/solmate/src/',
+    'solady=lib/solady/src/'
+]

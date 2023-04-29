@@ -3,19 +3,24 @@ pragma solidity 0.8.17;
 
 import "test/utils/Utils.sol";
 
+import {Logger} from "src/Logger.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morphous, Constants} from "src/Morphous.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/actions/flashloan/FL.sol";
 
 contract StrategiesTest is Utils {
     Neo neo;
+    Logger logger;
     IDSProxy proxy;
     Morphous morpheous;
     FL balancerFL;
+
+    address internal constant _LOGGER_PLACEHOLDER = 0x1234567890123456789012345678901234567890;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
@@ -24,7 +29,20 @@ contract StrategiesTest is Utils {
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
     function setUp() public {
-        morpheous = new Morphous();
+        // Assuming Logger is a library
+        logger = new Logger();
+
+        bytes memory _morphousByteCode = bytes(
+            LibString.replace(
+                string(abi.encodePacked(type(Morphous).creationCode)),
+                string(abi.encodePacked(_LOGGER_PLACEHOLDER)),
+                string(abi.encodePacked(address(logger)))
+            )
+        );
+
+        // Deploy the contract with the correct constant address.
+        morpheous = Morphous(payable(deployBytecode(_morphousByteCode, "")));
+
         balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
@@ -92,7 +110,7 @@ contract StrategiesTest is Utils {
             "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _toFlashloan
         );
 
-        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata);
+        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, new uint256[](5));
 
         // Flashlaon functions parameters.
         address[] memory _tokens = new address[](1);
@@ -139,7 +157,7 @@ contract StrategiesTest is Utils {
             "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed
         );
 
-        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata);
+        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, new uint256[](4));
 
         // Flashlaon functions parameters.
         address[] memory _tokens = new address[](1);
@@ -157,5 +175,14 @@ contract StrategiesTest is Utils {
             false
         );
         proxy.execute(address(neo), _proxyData);
+    }
+
+    /// @notice Helper function to deploy a contract from bytecode.
+    function deployBytecode(bytes memory bytecode, bytes memory args) private returns (address deployed) {
+        bytecode = abi.encodePacked(bytecode, args);
+        assembly {
+            deployed := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+        require(deployed != address(0), "DEPLOYMENT_FAILED");
     }
 }

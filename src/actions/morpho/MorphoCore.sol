@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
+import {LogCore} from "src/LogCore.sol";
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {ICToken} from "src/interfaces/ICToken.sol";
 import {Constants} from "src/libraries/Constants.sol";
@@ -10,9 +11,12 @@ import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 /// @notice Supply a token to an MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
-abstract contract MorphoCore {
+abstract contract MorphoCore is LogCore {
     modifier onlyValidMarket(address _market) {
-        if (_market != Constants._MORPHO_AAVE && _market != Constants._MORPHO_COMPOUND) {
+        if (
+            _market != Constants._MORPHO_AAVE && _market != Constants._MORPHO_COMPOUND
+                && _market != Constants._MORPHO_AAVE_V3
+        ) {
             revert Constants.INVALID_MARKET();
         }
         _;
