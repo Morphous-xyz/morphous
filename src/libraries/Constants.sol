@@ -18,6 +18,10 @@ library Constants {
     /// @notice The address of Morpho Aave markets.
     address public constant _MORPHO_AAVE = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
 
+    /// @notice The address of Morpho Aave markets.
+    /// TODO: Replace this address with the correct one.
+    address public constant _MORPHO_AAVE_V3 = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
+
     /// @notice Address of Aave Lending Pool contract.
     address internal constant _AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
