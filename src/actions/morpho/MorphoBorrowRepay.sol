@@ -37,4 +37,26 @@ abstract contract MorphoBorrowRepay is MorphoCore {
 
         LOGGER.logRepay(_token, _onBehalf, _amount);
     }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- V3
+    ///////////////////////////////////////////////////////////////
+
+    /// TODO: Update all EVENTS for V3
+
+    function borrow(address underlying, uint256 amount, address onBehalf, address receiver, uint256 maxIterations)
+        external
+    {
+        TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
+        IMorpho(Constants._MORPHO_AAVE_V3).borrow(underlying, amount, onBehalf, receiver, maxIterations);
+
+        LOGGER.logBorrow(underlying, amount);
+    }
+
+    function repay(address underlying, uint256 amount, address onBehalf) external {
+        TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
+        IMorpho(Constants._MORPHO_AAVE_V3).repay(underlying, onBehalf, amount);
+
+        LOGGER.logRepay(underlying, onBehalf, amount);
+    }
 }
