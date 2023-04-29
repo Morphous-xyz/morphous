@@ -50,4 +50,32 @@ abstract contract MorphoSupplyWithdraw is MorphoCore {
     ////////////////////////////////////////////////////////////////
     /// --- V3
     ///////////////////////////////////////////////////////////////
+
+    /// TODO: Update all EVENTS for V3
+
+    function supply(address underlying, uint256 amount, address onBehalf, uint256 maxIterations) external {
+        TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
+        IMorpho(Constants._MORPHO_AAVE_V3).supply(underlying, amount, onBehalf, maxIterations);
+
+        LOGGER.logSupply(underlying, address(this), amount);
+    }
+
+    function supplyCollateral(address underlying, uint256 amount, address onBehalf) external {
+        TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
+        IMorpho(Constants._MORPHO_AAVE_V3).supplyCollateral(underlying, amount, onBehalf);
+
+        LOGGER.logSupply(underlying, address(this), amount);
+    }
+
+    function withdraw(address underlying, uint256 amount, address onBehalf, address receiver, uint256 maxIterations)
+        external
+    {
+        IMorpho(Constants._MORPHO_AAVE_V3).withdraw(underlying, amount, onBehalf, receiver, maxIterations);
+        LOGGER.logWithdraw(underlying, amount);
+    }
+
+    function withdrawCollateral(address underlying, uint256 amount, address onBehalf, address receiver) external {
+        IMorpho(Constants._MORPHO_AAVE_V3).withdrawCollateral(underlying, amount, onBehalf, receiver);
+        LOGGER.logWithdraw(underlying, amount);
+    }
 }
