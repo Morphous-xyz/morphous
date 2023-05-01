@@ -31,10 +31,7 @@ abstract contract MorphoClaimRewards is MorphoCore {
 
     /// TODO: Update all EVENTS for V3
 
-    function claim(address[] calldata assets, address onBehalf)
-        external
-        returns (address[] memory rewards, uint256[] memory amounts)
-    {
-        (rewards, amounts) = IMorpho(Constants._MORPHO_AAVE_V3).claimRewards(assets, onBehalf);
+    function claim(address[] calldata assets, address onBehalf) external {
+        IMorpho(Constants._MORPHO_AAVE_V3).claimRewards(assets, onBehalf);
     }
 }
