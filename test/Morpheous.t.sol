@@ -7,6 +7,9 @@ import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morphous, Constants} from "src/Morphous.sol";
+import {Zion} from "src/v3/Zion.sol";
+import {ModularMorphous} from "src/v3/ModularMorphous.sol";
+import {ModuleA, ModuleB} from "src/v3/test/TestModules.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/actions/flashloan/FL.sol";
@@ -15,6 +18,8 @@ contract MorpheousTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Morphous morpheous;
+    ModularMorphous modularMorpheous;
+    Zion zion;
     FL fl;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -24,7 +29,13 @@ contract MorpheousTest is Utils {
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
+    // For test modules
+    event Log(uint256 value);
+
     function setUp() public {
+        zion = new Zion();
+        modularMorpheous = new ModularMorphous(zion);
+
         morpheous = new Morphous();
         fl = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(fl));
@@ -33,6 +44,68 @@ contract MorpheousTest is Utils {
 
     function testInitialSetup() public {
         assertEq(proxy.owner(), address(this));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- ZION
+    ///////////////////////////////////////////////////////////////
+
+    function testOwnerSetModule() public {
+        bytes32 identifier = keccak256("Test");
+        zion.setModule(identifier, address(0xAbA));
+        assertEq(zion.getModule(identifier), address(0xAbA));
+    }
+
+    function testNonOwnerSetModule(address owner) public {
+        vm.assume(owner != address(this));
+        zion.transferOwnership(owner);
+
+        vm.expectRevert("UNAUTHORIZED");
+        zion.setModule(keccak256(""), address(0xAbA));
+    }
+
+    function testOwnerCannotOverwriteModule() public {
+        bytes32 identifier = keccak256("Test");
+        zion.setModule(identifier, address(0xAbA));
+        assertEq(zion.getModule(identifier), address(0xAbA));
+
+        vm.expectRevert("Module already set");
+        zion.setModule(identifier, address(0xCACA));
+    }
+
+    function testGetUnsetModule() public {
+        assertEq(zion.getModule(keccak256("")), address(0));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- MODULAR MORPHOUS
+    ///////////////////////////////////////////////////////////////
+
+    function testMulticall() public {
+        // Deploy both test modules
+        ModuleA moduleA = new ModuleA();
+        ModuleB moduleB = new ModuleB();
+
+        // Set modules in Zion
+        bytes32 identifierA = keccak256("ModuleA");
+        bytes32 identifierB = keccak256("ModuleB");
+
+        zion.setModule(identifierA, address(moduleA));
+        zion.setModule(identifierB, address(moduleB));
+
+        // Encode call data
+        bytes[] memory _calldata = new bytes[](2);
+        _calldata[0] = abi.encode(identifierA, abi.encodeWithSignature("testA(uint256)", 1));
+        _calldata[1] = abi.encode(identifierB, abi.encodeWithSignature("testB(uint256)", 2));
+
+        // Execute multicall via DsProxy (using a delegatecall)
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", block.timestamp + 15, _calldata);
+
+        // Check that the modules were called correctly
+        vm.expectEmit(true, true, true, true);
+        emit Log(1);
+        emit Log(2);
+        proxy.execute(address(modularMorpheous), _proxyData);
     }
 
     ////////////////////////////////////////////////////////////////
