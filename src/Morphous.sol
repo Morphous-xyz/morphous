@@ -3,15 +3,14 @@ pragma solidity 0.8.17;
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {TokenActions} from "src/actions/TokenActions.sol";
-import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
+import {IZion} from "src/interfaces/IZion.sol";
 
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morphous is MorphoRouter, TokenActions {
+contract Morphous {
     /// @notice Address of this contract.
-    address public immutable _MORPHEUS;
+    IZion public immutable _ZION;
 
     /// @notice Checks if timestamp is not expired
     /// @param deadline Timestamp to not be expired.
@@ -20,13 +19,15 @@ contract Morphous is MorphoRouter, TokenActions {
         _;
     }
 
-    constructor() {
-        _MORPHEUS = address(this);
+    constructor(IZion _zion) {
+        _ZION = _zion;
     }
 
     /// @notice Call multiple functions in the current contract and return the data from all of them if they all succeed
     /// @param deadline The time by which this function must be called before failing
-    /// @param data The encoded function data for each of the calls to make to this contract
+    /// @param data The encoded function data for each of the calls to make to this contract.
+    /// Each item should contain the identifier of the module followed by the data to be passed to the module.
+    /// @dev Uses the Zion contract as a registry to retrieve the module addresses.
     /// @return results The results from each of the calls passed in via data
     function multicall(uint256 deadline, bytes[] calldata data)
         public
@@ -34,9 +35,22 @@ contract Morphous is MorphoRouter, TokenActions {
         checkDeadline(deadline)
         returns (bytes32[] memory results)
     {
+        // Initialize an array to hold the results from each of the calls
         results = new bytes32[](data.length);
+
+        // Loop through the array of function data
         for (uint256 i = 0; i < data.length; i++) {
-            results[i] = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
+            // Decode the first item of the array into a module identifier and the associated function data
+            // Add a sanity check to ensure that the data is not empty (this would cause a revert due to abi.decode)
+            if (data[i].length != 0) {
+                (bytes32 identifier, bytes memory currentData) = abi.decode(data[i], (bytes32, bytes));
+
+                // Use the Zion contract to retrieve the module address for the given identifier
+                address module = _ZION.getModule(identifier);
+
+                // Use the IDSProxy contract to call the function in the module and store the result
+                results[i] = IDSProxy(address(this)).execute(module, currentData);
+            }
         }
     }
 

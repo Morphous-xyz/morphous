@@ -6,7 +6,7 @@ import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 /// @notice Contract that allows to swap tokens through different aggregators.
-abstract contract Aggregators {
+contract AggregatorsModule {
     using SafeTransferLib for ERC20;
 
     /// @notice Error when swap fails.

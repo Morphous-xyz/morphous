@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import {IZion} from "src/v3/interfaces/IZion.sol";
+import {IZion} from "src/interfaces/IZion.sol";
 import {Owned} from "solmate/auth/Owned.sol";
 
 /**

@@ -7,14 +7,19 @@ import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morphous, Constants} from "src/Morphous.sol";
+import {Zion} from "src/Zion.sol";
+import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
+import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
+import {MorphoModule} from "src/modules/MorphoModule.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {FL} from "src/actions/flashloan/FL.sol";
+import {FL} from "src/FL.sol";
 
 contract StrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Morphous morpheous;
+    Zion zion;
     FL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -23,11 +28,26 @@ contract StrategiesTest is Utils {
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
+    bytes32 internal constant _AGGREGATORS_MODULE = keccak256("AggregatorsModule");
+    bytes32 internal constant _TOKEN_ACTIONS_MODULE = keccak256("TokenActionsModule");
+    bytes32 internal constant _MORPHO_MODULE = keccak256("MorphoV2Module");
+
     function setUp() public {
-        morpheous = new Morphous();
+        zion = new Zion();
+        morpheous = new Morphous(zion);
         balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
+
+        // Modules
+        AggregatorsModule aggregatorsModule = new AggregatorsModule();
+        TokenActionsModule tokenActionsModule = new TokenActionsModule();
+        MorphoModule morphoModule = new MorphoModule();
+
+        // Add modules to Zion
+        zion.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
+        zion.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
+        zion.setModule(_MORPHO_MODULE, address(morphoModule));
     }
 
     ////////////////////////////////////////////////////////////////
@@ -81,15 +101,25 @@ contract StrategiesTest is Utils {
 
         /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](5);
-        _calldata[0] = abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan);
-        _calldata[1] = abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan);
-        _calldata[2] = abi.encodeWithSignature(
-            "supply(address,address,address,uint256)", _market, _poolSupplyToken, _proxy, _amount + _toFlashloan
+
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan));
+        _calldata[1] =
+            abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan));
+        _calldata[2] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature(
+                "supply(address,address,address,uint256)", _market, _poolSupplyToken, _proxy, _amount + _toFlashloan
+            )
         );
-        _calldata[3] =
-            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolBorrowToken, _toFlashloan);
-        _calldata[4] = abi.encodeWithSignature(
-            "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _toFlashloan
+        _calldata[3] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolBorrowToken, _toFlashloan)
+        );
+        _calldata[4] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature(
+                "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _toFlashloan
+            )
         );
 
         bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata);
@@ -122,16 +152,28 @@ contract StrategiesTest is Utils {
 
         /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature(
-            "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
+
+        _calldata[0] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature(
+                "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
+            )
         );
-        _calldata[1] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max);
-        _calldata[2] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", AUGUSTUS, _supplyToken, _borrowToken, _quote, _txData
+        _calldata[1] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max)
         );
-        _calldata[3] = abi.encodeWithSignature(
-            "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed
+        _calldata[2] = abi.encode(
+            _AGGREGATORS_MODULE,
+            abi.encodeWithSignature(
+                "exchange(address,address,address,uint256,bytes)", AUGUSTUS, _supplyToken, _borrowToken, _quote, _txData
+            )
+        );
+        _calldata[3] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature(
+                "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed
+            )
         );
 
         bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata);

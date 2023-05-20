@@ -3,7 +3,8 @@ pragma solidity 0.8.17;
 
 import "src/Neo.sol";
 import "src/Morphous.sol";
-import "src/actions/flashloan/FL.sol";
+import "src/FL.sol";
+import "src/Zion.sol";
 
 import "forge-std/Script.sol";
 
@@ -11,11 +12,13 @@ contract DeployScript is Script {
     FL internal fl;
     Neo internal neo;
     Morphous internal morphous;
+    Zion internal zion;
 
     function run() public {
         vm.startBroadcast();
 
-        morphous = new Morphous();
+        zion = new Zion();
+        morphous = new Morphous(zion);
         fl = new FL(address(morphous));
         neo = new Neo(address(morphous), address(fl));
 

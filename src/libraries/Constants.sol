@@ -15,6 +15,9 @@ library Constants {
     /// @notice WETH address.
     address internal constant _WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
+    /// @notice DAI address.
+    address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
     /// @notice The address of Morpho Aave markets.
     address internal constant _MORPHO_AAVE = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
 
