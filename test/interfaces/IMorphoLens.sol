@@ -11,4 +11,8 @@ interface IMorphoLens {
         external
         view
         returns (uint256, uint256, uint256);
+
+    function collateralBalance(address, address) external view returns (uint256);
+    function supplyBalance(address, address) external view returns (uint256);
+    function borrowBalance(address, address) external view returns (uint256);
 }

@@ -9,16 +9,11 @@ import {MorphoCore} from "src/actions/morpho/MorphoCore.sol";
 /// @notice Borrow a token from a MorphoRouter-Aave or MorphoRouter-Compound _market.
 /// @author @Mutative_
 abstract contract MorphoBorrowRepay is MorphoCore {
-    event Borrowed(address indexed token, uint256 amount);
-    event BorrowedWithMaxGas(address indexed token, uint256 amount, uint256 maxGas);
-
-    event Repaid(address indexed token, address onBehalf, uint256 amount);
-
     function borrow(address _market, address _poolToken, uint256 _amount) external onlyValidMarket(_market) {
         address _token = _getToken(_market, _poolToken);
         IMorpho(_market).borrow(_poolToken, _amount);
 
-        emit Borrowed(_token, _amount);
+        LOGGER.logBorrow(_token, _amount);
     }
 
     function borrow(address _market, address _poolToken, uint256 _amount, uint256 _maxGasForMatching)
@@ -28,7 +23,7 @@ abstract contract MorphoBorrowRepay is MorphoCore {
         address _token = _getToken(_market, _poolToken);
         IMorpho(_market).borrow(_poolToken, _amount, _maxGasForMatching);
 
-        emit BorrowedWithMaxGas(_token, _amount, _maxGasForMatching);
+        LOGGER.logBorrow(_token, _amount, _maxGasForMatching);
     }
 
     function repay(address _market, address _poolToken, address _onBehalf, uint256 _amount)
@@ -40,6 +35,27 @@ abstract contract MorphoBorrowRepay is MorphoCore {
         TokenUtils._approve(_token, _market, _amount);
         IMorpho(_market).repay(_poolToken, _onBehalf, _amount);
 
-        emit Repaid(_token, _onBehalf, _amount);
+        LOGGER.logRepay(_token, _onBehalf, _amount);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- V3
+    ///////////////////////////////////////////////////////////////
+
+    /// TODO: Update all EVENTS for V3
+
+    function borrow(address underlying, uint256 amount, address onBehalf, address receiver, uint256 maxIterations)
+        external
+    {
+        IMorpho(Constants._MORPHO_AAVE_V3).borrow(underlying, amount, onBehalf, receiver, maxIterations);
+
+        LOGGER.logBorrow(underlying, amount);
+    }
+
+    function repay(address underlying, uint256 amount, address onBehalf) external {
+        TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
+        IMorpho(Constants._MORPHO_AAVE_V3).repay(underlying, onBehalf, amount);
+
+        LOGGER.logRepay(underlying, onBehalf, amount);
     }
 }

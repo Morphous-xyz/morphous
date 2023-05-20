@@ -16,7 +16,11 @@ library Constants {
     address internal constant _WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     /// @notice The address of Morpho Aave markets.
-    address internal constant _MORPHO_AAVE = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
+    address public constant _MORPHO_AAVE = 0x777777c9898D384F785Ee44Acfe945efDFf5f3E0;
+
+    /// @notice The address of Morpho Aave markets.
+    /// TODO: Replace this address with the correct one.
+    address public constant _MORPHO_AAVE_V3 = 0x33333aea097c193e66081E930c33020272b33333;
 
     /// @notice Address of Aave Lending Pool contract.
     address internal constant _AAVE_LENDING_POOL = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
@@ -25,7 +29,7 @@ library Constants {
     address internal constant _BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
     /// @notice The address of Morpho Compound markets.
-    address internal constant _MORPHO_COMPOUND = 0x8888882f8f843896699869179fB6E4f7e3B58888;
+    address public constant _MORPHO_COMPOUND = 0x8888882f8f843896699869179fB6E4f7e3B58888;
 
     /// @notice Address of Factory Guard contract.
     address internal constant _FACTORY_GUARD_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
@@ -36,6 +40,9 @@ library Constants {
 
     /// @dev Error message when the caller is not allowed to call the function.
     error NOT_ALLOWED();
+
+    /// @dev Error message when array length is invalid.
+    error INVALID_LENGTH();
 
     /// @dev Error message when the caller is not allowed to call the function.
     error INVALID_LENDER();
