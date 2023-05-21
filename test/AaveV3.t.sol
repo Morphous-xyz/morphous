@@ -109,17 +109,21 @@ contract AaveV3Test is Utils {
     function testMorphoSupplyBorrow() public {
         address _proxy = address(proxy);
         // Supply _userData.
+        address _supplyToken = _DAI;
         address _token = Constants._WETH;
-        uint256 _amount = 10e18;
+        uint256 _amount = 1e24;
+
+        deal(_supplyToken, address(this), _amount);
+        ERC20(_supplyToken).approve(_proxy, _amount);
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](3);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] = abi.encodeWithSignature("supplyCollateral(address,uint256,address)", _token, _amount, _proxy);
+        _calldata[0] = abi.encodeWithSignature("transferFrom(address,address,uint256)", _supplyToken, address(this), _amount);
+        _calldata[1] = abi.encodeWithSignature("supplyCollateral(address,uint256,address)", _supplyToken, _amount, _proxy);
         _calldata[2] = abi.encodeWithSignature(
-            "borrow(address,uint256,address,address,uint256)", _token, _amount / 2, _proxy, _proxy, 4
+            "borrow(address,uint256,address,address,uint256)", _token, 1e18, _proxy, _proxy, 4
         );
 
         uint256[] memory _argPos = new uint256[](3);
@@ -129,11 +133,11 @@ contract AaveV3Test is Utils {
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         uint256 _totalBorrowed = IMorphoLens(Constants._MORPHO_AAVE_V3).borrowBalance(_token, _proxy);
-        uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).collateralBalance(_token, _proxy);
+        uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).collateralBalance(_supplyToken, _proxy);
 
         assertApproxEqAbs(_totalBalance, _amount, 4);
-        assertApproxEqAbs(_totalBorrowed, _amount / 2, 4);
-        assertApproxEqAbs(ERC20(_token).balanceOf(_proxy), _amount / 2, 4);
+        assertApproxEqAbs(_totalBorrowed, 1e18, 4);
+        assertApproxEqAbs(ERC20(_token).balanceOf(_proxy), 1e18, 4);
     }
 
     /// @notice Helper function to deploy a contract from bytecode.
