@@ -5,10 +5,11 @@ import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {IZion} from "src/interfaces/IZion.sol";
 
-/// @title Morphous
+/// @title Modular Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
+/// @dev This contract interacts with a registry (Zion) to retrieve the module addresses.
 /// @author @Mutative_
-contract Morphous {
+contract ModMorphous {
     /// @notice Address of this contract.
     IZion public immutable _ZION;
 

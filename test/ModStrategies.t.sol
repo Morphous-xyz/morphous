@@ -6,19 +6,19 @@ import "test/utils/Utils.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {Morphous, Constants} from "src/Morphous.sol";
-import {Zion} from "src/Zion.sol";
-import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
-import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
-import {MorphoModule} from "src/modules/MorphoModule.sol";
+import {ModMorphous, Constants} from "src/modular/ModMorphous.sol";
+import {Zion} from "src/modular/Zion.sol";
+import {AggregatorsModule} from "src/modular/modules/AggregatorsModule.sol";
+import {TokenActionsModule} from "src/modular/modules/TokenActionsModule.sol";
+import {MorphoModule} from "src/modular/modules/MorphoModule.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/FL.sol";
 
-contract StrategiesTest is Utils {
+contract ModStrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
-    Morphous morpheous;
+    ModMorphous morpheous;
     Zion zion;
     FL balancerFL;
 
@@ -34,7 +34,7 @@ contract StrategiesTest is Utils {
 
     function setUp() public {
         zion = new Zion();
-        morpheous = new Morphous(zion);
+        morpheous = new ModMorphous(zion);
         balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());

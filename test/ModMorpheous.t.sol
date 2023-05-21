@@ -7,21 +7,21 @@ import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {Zion} from "src/Zion.sol";
-import {Morphous} from "src/Morphous.sol";
-import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
-import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
-import {MorphoModule} from "src/modules/MorphoModule.sol";
+import {Zion} from "src/modular/Zion.sol";
+import {ModMorphous} from "src/modular/ModMorphous.sol";
+import {AggregatorsModule} from "src/modular/modules/AggregatorsModule.sol";
+import {TokenActionsModule} from "src/modular/modules/TokenActionsModule.sol";
+import {MorphoModule} from "src/modular/modules/MorphoModule.sol";
 
-import {ModuleA, ModuleB} from "src/test/TestModules.sol";
+import {ModuleA, ModuleB} from "src/modular/test/TestModules.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/FL.sol";
 
-contract MorpheousTest is Utils {
+contract ModMorpheousTest is Utils {
     Neo neo;
     IDSProxy proxy;
-    Morphous morpheous;
+    ModMorphous morpheous;
     Zion zion;
     FL fl;
 
@@ -41,7 +41,7 @@ contract MorpheousTest is Utils {
 
     function setUp() public {
         zion = new Zion();
-        morpheous = new Morphous(zion);
+        morpheous = new ModMorphous(zion);
         fl = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(fl));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
