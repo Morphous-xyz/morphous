@@ -3,15 +3,16 @@ pragma solidity 0.8.17;
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
+import {Zion} from "src/modular/Zion.sol";
 import {IZion} from "src/interfaces/IZion.sol";
+import {Owned} from "solmate/auth/Owned.sol";
 
 /// @title Modular Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @dev This contract interacts with a registry (Zion) to retrieve the module addresses.
 /// @author @Mutative_
-contract ModMorphous {
-    /// @notice Address of this contract.
-    IZion public immutable _ZION;
+contract ModMorphous is Zion, Owned(msg.sender) {
+    IZion internal immutable _ZION;
 
     /// @notice Checks if timestamp is not expired
     /// @param deadline Timestamp to not be expired.
@@ -20,8 +21,21 @@ contract ModMorphous {
         _;
     }
 
-    constructor(IZion _zion) {
-        _ZION = _zion;
+    constructor() {
+        _ZION = IZion(address(this));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- Zion functions
+    ///////////////////////////////////////////////////////////////
+
+    function getModule(bytes32 identifier) external view returns (address) {
+        return _getModule(identifier);
+    }
+
+    /// @notice Sees {Zion-_setModule}.
+    function setModule(bytes32 identifier, address module) external onlyOwner {
+        _setModule(identifier, module);
     }
 
     /// @notice Call multiple functions in the current contract and return the data from all of them if they all succeed
@@ -46,7 +60,7 @@ contract ModMorphous {
             if (data[i].length != 0) {
                 (bytes32 identifier, bytes memory currentData) = abi.decode(data[i], (bytes32, bytes));
 
-                // Use the Zion contract to retrieve the module address for the given identifier
+                // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
                 address module = _ZION.getModule(identifier);
 
                 // Use the IDSProxy contract to call the function in the module and store the result

@@ -6,7 +6,7 @@ import "test/utils/Utils.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {ModMorphous, Constants} from "src/modular/ModMorphous.sol";
+import {ModMorphous, Constants} from "src/modular/Morphous.sol";
 import {Zion} from "src/modular/Zion.sol";
 import {AggregatorsModule} from "src/modular/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modular/modules/TokenActionsModule.sol";
@@ -19,7 +19,6 @@ contract ModStrategiesTest is Utils {
     Neo neo;
     IDSProxy proxy;
     ModMorphous morpheous;
-    Zion zion;
     FL balancerFL;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -33,8 +32,8 @@ contract ModStrategiesTest is Utils {
     bytes32 internal constant _MORPHO_MODULE = keccak256("MorphoV2Module");
 
     function setUp() public {
-        zion = new Zion();
-        morpheous = new ModMorphous(zion);
+        //zion = new Zion();
+        morpheous = new ModMorphous();
         balancerFL = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(balancerFL));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
@@ -45,9 +44,9 @@ contract ModStrategiesTest is Utils {
         MorphoModule morphoModule = new MorphoModule();
 
         // Add modules to Zion
-        zion.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
-        zion.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
-        zion.setModule(_MORPHO_MODULE, address(morphoModule));
+        morpheous.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
+        morpheous.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
+        morpheous.setModule(_MORPHO_MODULE, address(morphoModule));
     }
 
     ////////////////////////////////////////////////////////////////

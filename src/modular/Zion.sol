@@ -2,7 +2,6 @@
 pragma solidity 0.8.17;
 
 import {IZion} from "src/interfaces/IZion.sol";
-import {Owned} from "solmate/auth/Owned.sol";
 
 /**
  * @title Zion
@@ -10,7 +9,7 @@ import {Owned} from "solmate/auth/Owned.sol";
  * @dev This contract is used for the Multicall to know which module call.
  * @dev That module structure allows us to upgrade the system without having to redeploy the whole system.
  */
-contract Zion is IZion, Owned(msg.sender) {
+abstract contract Zion is IZion {
     // Mapping to store the contract modules in the system.
     // The key is a bytes32 identifier and the value is the contract address.
     mapping(bytes32 => address) internal modules;
@@ -24,7 +23,7 @@ contract Zion is IZion, Owned(msg.sender) {
      * @dev This function can only be called by the owner of the contract.
      * If the module is already set for the identifier, it will revert the transaction.
      */
-    function setModule(bytes32 identifier, address module) external onlyOwner {
+    function _setModule(bytes32 identifier, address module) internal {
         require(modules[identifier] == address(0), "Module already set");
 
         modules[identifier] = module;
@@ -39,7 +38,7 @@ contract Zion is IZion, Owned(msg.sender) {
      * @return The address of the module.
      * @dev This is a view function, meaning it only reads data and does not modify the contract state.
      */
-    function getModule(bytes32 identifier) public view returns (address) {
+    function _getModule(bytes32 identifier) internal view returns (address) {
         return modules[identifier];
     }
 }

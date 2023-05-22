@@ -7,8 +7,7 @@ import {Neo, TokenUtils} from "src/Neo.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {Zion} from "src/modular/Zion.sol";
-import {ModMorphous} from "src/modular/ModMorphous.sol";
+import {ModMorphous} from "src/modular/Morphous.sol";
 import {AggregatorsModule} from "src/modular/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modular/modules/TokenActionsModule.sol";
 import {MorphoModule} from "src/modular/modules/MorphoModule.sol";
@@ -22,7 +21,6 @@ contract ModMorpheousTest is Utils {
     Neo neo;
     IDSProxy proxy;
     ModMorphous morpheous;
-    Zion zion;
     FL fl;
 
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -40,21 +38,23 @@ contract ModMorpheousTest is Utils {
     event Log(uint256 value);
 
     function setUp() public {
-        zion = new Zion();
-        morpheous = new ModMorphous(zion);
+        morpheous = new ModMorphous();
         fl = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(fl));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
+
+        // Add Neo / Zion to Morphous
+        //morpheous.initialize(address(neo));
 
         // Modules
         AggregatorsModule aggregatorsModule = new AggregatorsModule();
         TokenActionsModule tokenActionsModule = new TokenActionsModule();
         MorphoModule morphoModule = new MorphoModule();
 
-        // Add modules to Zion
-        zion.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
-        zion.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
-        zion.setModule(_MORPHO_MODULE, address(morphoModule));
+        // Add modules to neo/Zion
+        morpheous.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
+        morpheous.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
+        morpheous.setModule(_MORPHO_MODULE, address(morphoModule));
     }
 
     function testInitialSetup() public {
@@ -67,29 +67,29 @@ contract ModMorpheousTest is Utils {
 
     function testOwnerSetModule() public {
         bytes32 identifier = keccak256("Test");
-        zion.setModule(identifier, address(0xAbA));
-        assertEq(zion.getModule(identifier), address(0xAbA));
+        morpheous.setModule(identifier, address(0xAbA));
+        assertEq(morpheous.getModule(identifier), address(0xAbA));
     }
 
     function testNonOwnerSetModule(address owner) public {
         vm.assume(owner != address(this));
-        zion.transferOwnership(owner);
+        morpheous.transferOwnership(owner);
 
         vm.expectRevert("UNAUTHORIZED");
-        zion.setModule(keccak256(""), address(0xAbA));
+        morpheous.setModule(keccak256(""), address(0xAbA));
     }
 
     function testOwnerCannotOverwriteModule() public {
         bytes32 identifier = keccak256("Test");
-        zion.setModule(identifier, address(0xAbA));
-        assertEq(zion.getModule(identifier), address(0xAbA));
+        morpheous.setModule(identifier, address(0xAbA));
+        assertEq(morpheous.getModule(identifier), address(0xAbA));
 
         vm.expectRevert("Module already set");
-        zion.setModule(identifier, address(0xCACA));
+        morpheous.setModule(identifier, address(0xCACA));
     }
 
     function testGetUnsetModule() public {
-        assertEq(zion.getModule(keccak256("")), address(0));
+        assertEq(morpheous.getModule(keccak256("")), address(0));
     }
 
     ////////////////////////////////////////////////////////////////
@@ -105,8 +105,8 @@ contract ModMorpheousTest is Utils {
         bytes32 identifierA = keccak256("ModuleA");
         bytes32 identifierB = keccak256("ModuleB");
 
-        zion.setModule(identifierA, address(moduleA));
-        zion.setModule(identifierB, address(moduleB));
+        morpheous.setModule(identifierA, address(moduleA));
+        morpheous.setModule(identifierB, address(moduleB));
 
         // Encode call data
         bytes[] memory _calldata = new bytes[](2);
