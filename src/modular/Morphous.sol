@@ -56,16 +56,13 @@ contract ModMorphous is Zion, Owned(msg.sender) {
         // Loop through the array of function data
         for (uint256 i = 0; i < data.length; i++) {
             // Decode the first item of the array into a module identifier and the associated function data
-            // Add a sanity check to ensure that the data is not empty (this would cause a revert due to abi.decode)
-            if (data[i].length != 0) {
-                (bytes32 identifier, bytes memory currentData) = abi.decode(data[i], (bytes32, bytes));
+            (bytes32 identifier, bytes memory currentData) = abi.decode(data[i], (bytes32, bytes));
 
-                // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
-                address module = _ZION.getModule(identifier);
+            // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
+            address module = _ZION.getModule(identifier);
 
-                // Use the IDSProxy contract to call the function in the module and store the result
-                results[i] = IDSProxy(address(this)).execute(module, currentData);
-            }
+            // Use the IDSProxy contract to call the function in the module and store the result
+            results[i] = IDSProxy(address(this)).execute(module, currentData);
         }
     }
 

@@ -134,7 +134,7 @@ contract ModMorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
         uint256 _amount = 1e18;
 
-        bytes[] memory _calldata = new bytes[](2);
+        bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
             _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount)
@@ -164,7 +164,7 @@ contract ModMorpheousTest is Utils {
         uint256 _fee = _amount * 9 / 10000;
         deal(_DAI, _proxy, _fee);
 
-        bytes[] memory _calldata = new bytes[](2);
+        bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
             _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount + _fee)
