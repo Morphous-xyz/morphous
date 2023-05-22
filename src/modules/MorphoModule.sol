@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import {BaseModule} from "src/modules/BaseModule.sol";
-import {Logger} from "src/logger/Logger.sol";
-import {IMorpho} from "src/interfaces/IMorpho.sol";
-import {ICToken} from "src/interfaces/ICToken.sol";
-import {Constants} from "src/libraries/Constants.sol";
-import {TokenUtils} from "src/libraries/TokenUtils.sol";
-import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Constants} from "src/libraries/Constants.sol";
+import {ICToken} from "src/interfaces/ICToken.sol";
+import {IMorpho} from "src/interfaces/IMorpho.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {IRewardsDistributor} from "src/interfaces/IRewardsDistributor.sol";
+import {Logger} from "src/logger/Logger.sol";
+import {TokenUtils} from "src/libraries/TokenUtils.sol";
 
 contract MorphoModule is BaseModule {
     using SafeTransferLib for ERC20;

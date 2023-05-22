@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import {BaseModule} from "src/modules/BaseModule.sol";
-import {Logger} from "src/logger/Logger.sol";
-import {Constants} from "src/libraries/Constants.sol";
-import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Constants} from "src/libraries/Constants.sol";
+import {Logger} from "src/logger/Logger.sol";
+import {TokenUtils} from "src/libraries/TokenUtils.sol";
 
 /// @notice Contract that allows to swap tokens through different aggregators.
 contract AggregatorsModule is BaseModule {
