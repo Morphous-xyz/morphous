@@ -5,7 +5,7 @@ import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 import {BaseModule} from "src/modules/BaseModule.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {Logger} from "src/logger/Logger.sol";
+import {Logger} from "src/Logger.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 
 /// @notice Contract that allows to swap tokens through different aggregators.

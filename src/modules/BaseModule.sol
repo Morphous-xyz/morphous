@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import {Owned} from "solmate/auth/Owned.sol";
 
-import {Logger} from "src/logger/Logger.sol";
+import {Logger} from "src/Logger.sol";
 
 /// @title BaseModule
 /// @notice BaseModule contract.

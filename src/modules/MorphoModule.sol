@@ -9,7 +9,7 @@ import {ICToken} from "src/interfaces/ICToken.sol";
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {IRewardsDistributor} from "src/interfaces/IRewardsDistributor.sol";
-import {Logger} from "src/logger/Logger.sol";
+import {Logger} from "src/Logger.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 
 contract MorphoModule is BaseModule {
@@ -82,14 +82,12 @@ contract MorphoModule is BaseModule {
     /// --- V3
     ///////////////////////////////////////////////////////////////
 
-    /// TODO: Update all EVENTS for V3
-
     function borrow(address underlying, uint256 amount, address onBehalf, address receiver, uint256 maxIterations)
         external
     {
         IMorpho(Constants._MORPHO_AAVE_V3).borrow(underlying, amount, onBehalf, receiver, maxIterations);
 
-        LOGGER.logBorrow(underlying, amount);
+        LOGGER.logBorrow(underlying, amount, onBehalf, receiver, maxIterations);
     }
 
     function repay(address underlying, uint256 amount, address onBehalf) external {
@@ -126,10 +124,10 @@ contract MorphoModule is BaseModule {
     /// --- V3
     ///////////////////////////////////////////////////////////////
 
-    /// TODO: Update all EVENTS for V3
-
     function claim(address[] calldata assets, address onBehalf) external {
-        IMorpho(Constants._MORPHO_AAVE_V3).claimRewards(assets, onBehalf);
+        (address[] memory claimedAssets, uint256[] memory claimed) =
+            IMorpho(Constants._MORPHO_AAVE_V3).claimRewards(assets, onBehalf);
+        LOGGER.logRewardClaimed(claimedAssets, claimed);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -179,7 +177,7 @@ contract MorphoModule is BaseModule {
         TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
         IMorpho(Constants._MORPHO_AAVE_V3).supply(underlying, amount, onBehalf, maxIterations);
 
-        LOGGER.logSupply(underlying, address(this), amount);
+        LOGGER.logSupplyMaxIterations(underlying, address(this), amount, maxIterations);
     }
 
     function supplyCollateral(address underlying, uint256 amount, address onBehalf) external {
@@ -193,11 +191,11 @@ contract MorphoModule is BaseModule {
         external
     {
         IMorpho(Constants._MORPHO_AAVE_V3).withdraw(underlying, amount, onBehalf, receiver, maxIterations);
-        LOGGER.logWithdraw(underlying, amount);
+        LOGGER.logWithdraw(underlying, amount, maxIterations);
     }
 
     function withdrawCollateral(address underlying, uint256 amount, address onBehalf, address receiver) external {
         IMorpho(Constants._MORPHO_AAVE_V3).withdrawCollateral(underlying, amount, onBehalf, receiver);
-        LOGGER.logWithdraw(underlying, amount);
+        LOGGER.logWithdraw(underlying, amount, onBehalf, receiver);
     }
 }

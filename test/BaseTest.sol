@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {FL} from "src/FL.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {Logger} from "src/logger/Logger.sol";
+import {Logger} from "src/Logger.sol";
 import {MorphoModule} from "src/modules/MorphoModule.sol";
 import {Morphous, Constants} from "src/Morphous.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";

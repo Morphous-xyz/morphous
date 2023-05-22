@@ -5,7 +5,7 @@ import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 import {BaseModule} from "src/modules/BaseModule.sol";
 import {IWETH} from "src/interfaces/IWETH.sol";
-import {Logger} from "src/logger/Logger.sol";
+import {Logger} from "src/Logger.sol";
 import {TokenUtils, Constants} from "src/libraries/TokenUtils.sol";
 
 contract TokenActionsModule is BaseModule {
