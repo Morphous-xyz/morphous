@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 contract Logger {
     event SuppliedOnBehalf(address indexed token, uint256 amount, address indexed onBehalfOf);
-    event SuppliedWithMaxGas(address indexed token, uint256 amount, address indexed onBehalOf, uint256 maxGas);
+    event SuppliedWithMaxGas(address indexed token, uint256 amount, address indexed onBehalfOf, uint256 maxGas);
 
     event Withdrawn(address indexed token, uint256 amount);
 

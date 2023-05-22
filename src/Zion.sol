@@ -11,10 +11,10 @@ import {IZion} from "src/interfaces/IZion.sol";
  */
 abstract contract Zion is IZion {
     // Mapping to store the contract modules in the system.
-    // The key is a bytes32 identifier and the value is the contract address.
-    mapping(bytes32 => address) internal modules;
+    // The key is a bytes1 identifier and the value is the contract address.
+    mapping(bytes1 => address) internal modules;
 
-    event ModuleSet(bytes32 indexed identifier, address indexed module);
+    event ModuleSet(bytes1 indexed identifier, address indexed module);
 
     /**
      * @notice Set a module for a given identifier.
@@ -23,7 +23,7 @@ abstract contract Zion is IZion {
      * @dev This function can only be called by the owner of the contract.
      * If the module is already set for the identifier, it will revert the transaction.
      */
-    function _setModule(bytes32 identifier, address module) internal {
+    function _setModule(bytes1 identifier, address module) internal {
         require(modules[identifier] == address(0), "Module already set");
 
         modules[identifier] = module;
@@ -38,7 +38,7 @@ abstract contract Zion is IZion {
      * @return The address of the module.
      * @dev This is a view function, meaning it only reads data and does not modify the contract state.
      */
-    function _getModule(bytes32 identifier) internal view returns (address) {
+    function _getModule(bytes1 identifier) internal view returns (address) {
         return modules[identifier];
     }
 }

@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Logger} from "src/logger/Logger.sol";
 import {IWETH} from "src/interfaces/IWETH.sol";
 import {TokenUtils, Constants} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-contract TokenActionsModule {
+contract TokenActionsModule is BaseModule {
     using SafeTransferLib for ERC20;
+
+    constructor(Logger logger) BaseModule(logger) {}
 
     function approveToken(address _token, address _to, uint256 _amount) external {
         TokenUtils._approve(_token, _to, _amount);

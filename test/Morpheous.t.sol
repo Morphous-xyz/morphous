@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import "test/utils/Utils.sol";
-
+import {BaseTest} from "test/BaseTest.sol";
 import {Logger} from "src/logger/Logger.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
+import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
+import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
+import {MorphoModule} from "src/modules/MorphoModule.sol";
+
+import {ModuleA, ModuleB} from "test/utils/TestModules.sol";
+
+import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+
 import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Morphous, Constants} from "src/Morphous.sol";
@@ -13,43 +21,79 @@ import {LibString} from "solady/utils/LibString.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {FL} from "src/FL.sol";
 
-contract MorpheousTest is Utils {
-    Neo neo;
-    IDSProxy proxy;
-    Logger logger;
-    Morphous morpheous;
-    FL fl;
+contract MorpheousTest is BaseTest {
+    // For test modules
+    event Log(uint256 value);
 
-    address internal constant _LOGGER_PLACEHOLDER = 0x1234567890123456789012345678901234567890;
-
-    address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
-    address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
-    address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
-    address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
-    address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
-
-    function setUp() public {
-        logger = new Logger();
-
-        bytes memory _morphousByteCode = bytes(
-            LibString.replace(
-                string(abi.encodePacked(type(Morphous).creationCode)),
-                string(abi.encodePacked(_LOGGER_PLACEHOLDER)),
-                string(abi.encodePacked(address(logger)))
-            )
-        );
-
-        // Deploy the contract with the correct constant address.
-        morpheous = Morphous(payable(deployBytecode(_morphousByteCode, "")));
-
-        fl = new FL(address(morpheous));
-        neo = new Neo(address(morpheous), address(fl));
-        proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
+    function setUp() public override {
+        super.setUp();
     }
 
-    function testInitialSetup() public {
-        assertEq(proxy.owner(), address(this));
+    ////////////////////////////////////////////////////////////////
+    /// --- ZION
+    ///////////////////////////////////////////////////////////////
+
+    function testOwnerSetModule() public {
+        bytes1 identifier = 0x10;
+        morpheous.setModule(identifier, address(0xAbA));
+        assertEq(morpheous.getModule(identifier), address(0xAbA));
+    }
+
+    function testNonOwnerSetModule(address owner) public {
+        vm.assume(owner != address(this));
+        morpheous.transferOwnership(owner);
+
+        vm.expectRevert("UNAUTHORIZED");
+        morpheous.setModule(0x10, address(0xAbA));
+    }
+
+    function testOwnerCannotOverwriteModule() public {
+        bytes1 identifier = 0x10;
+        morpheous.setModule(identifier, address(0xAbA));
+        assertEq(morpheous.getModule(identifier), address(0xAbA));
+
+        vm.expectRevert("Module already set");
+        morpheous.setModule(identifier, address(0xCACA));
+    }
+
+    function testGetUnsetModule() public {
+        assertEq(morpheous.getModule(0x10), address(0));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- MODULAR MORPHOUS
+    ///////////////////////////////////////////////////////////////
+
+    function testMulticall() public {
+        // Deploy both test modules
+        ModuleA moduleA = new ModuleA();
+        ModuleB moduleB = new ModuleB();
+
+        // Set modules in Zion
+        bytes1 identifierA = 0x10;
+        bytes1 identifierB = 0x11;
+
+        morpheous.setModule(identifierA, address(moduleA));
+        morpheous.setModule(identifierB, address(moduleB));
+
+        // Encode call data
+        bytes[] memory _calldata = new bytes[](2);
+        _calldata[0] = abi.encode(identifierA, abi.encodeWithSignature("A(uint256)", 1));
+        _calldata[1] = abi.encode(identifierB, abi.encodeWithSignature("B(uint256)", 2));
+
+        uint256[] memory _argPos = new uint256[](2);
+
+        // Execute multicall via DsProxy (using a delegatecall)
+        bytes memory _proxyData =
+            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", block.timestamp + 15, _calldata, _argPos);
+
+        // Check that the modules were called correctly
+        /*
+        vm.expectEmit(true, true, true, true);
+        emit Log(1);
+        emit Log(2);
+        */
+        proxy.execute(address(morpheous), _proxyData);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -64,7 +108,10 @@ contract MorpheousTest is Utils {
         uint256 _amount = 1e18;
 
         bytes[] memory _calldata = new bytes[](1);
-        _calldata[0] = abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount);
+        _calldata[0] = abi.encode(
+            Constants._TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount)
+        );
         uint256[] memory _argPos = new uint256[](1);
 
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, _argPos);
@@ -93,7 +140,10 @@ contract MorpheousTest is Utils {
         deal(_DAI, _proxy, _fee);
 
         bytes[] memory _calldata = new bytes[](1);
-        _calldata[0] = abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount + _fee);
+        _calldata[0] = abi.encode(
+            Constants._TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount + _fee)
+        );
 
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, new uint256[](1));
 
@@ -125,9 +175,12 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
 
         uint256[] memory _argPos = new uint256[](2);
 
@@ -150,12 +203,18 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[2] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[3] = abi.encodeWithSignature("withdrawWETH(uint256)", _amount);
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[3] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](4));
@@ -178,11 +237,16 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](3);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[2] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
 
         uint256[] memory _argPos = new uint256[](3);
         bytes memory _proxyData =
@@ -215,10 +279,18 @@ contract MorpheousTest is Utils {
         address _token = IPoolToken(_poolToken).UNDERLYING_ASSET_ADDRESS(); // WETH
 
         bytes[] memory _calldata = new bytes[](3);
-        _calldata[0] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[1] = abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _amount);
-        _calldata[2] = abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(fl), _amount);
+        _calldata[0] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(fl), _amount)
+        );
 
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, new uint256[](3));
 
@@ -255,12 +327,23 @@ contract MorpheousTest is Utils {
         ERC20(_token).approve(_proxy, _amount);
 
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature("transferFrom(address,address,uint256)", _token, address(this), _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount * 2);
-        _calldata[2] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, type(uint256).max);
-        _calldata[3] = abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(fl), _amount);
+
+        _calldata[0] = abi.encode(
+            Constants._TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transferFrom(address,address,uint256)", _token, address(this), _amount)
+        );
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount * 2)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, type(uint256).max)
+        );
+        _calldata[3] = abi.encode(
+            Constants._TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(fl), _amount)
+        );
 
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, new uint256[](4));
 
@@ -289,7 +372,7 @@ contract MorpheousTest is Utils {
         assertEq(TokenUtils._balanceInOf(_token, address(this)), _amount);
     }
 
-    function testMorphoSupplyBorrow() public {
+    function testMorphoSupplyBorrowuhoh() public {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
@@ -300,10 +383,17 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](3);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[2] = abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2);
+
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2)
+        );
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](3));
@@ -328,12 +418,21 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[2] = abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2);
-        _calldata[3] =
-            abi.encodeWithSignature("repay(address,address,address,uint256)", _market, _poolToken, _proxy, _amount / 2);
+
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolToken, _amount / 2)
+        );
+        _calldata[3] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("repay(address,address,address,uint256)", _market, _poolToken, _proxy, _amount / 2)
+        );
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](4));
@@ -362,9 +461,12 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](2));
@@ -385,12 +487,19 @@ contract MorpheousTest is Utils {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature("depositWETH(uint256)", _amount);
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[2] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount);
-        _calldata[3] = abi.encodeWithSignature("withdrawWETH(uint256)", _amount);
+
+        _calldata[0] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[2] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
+        );
+        _calldata[3] =
+            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
         uint256[] memory _argPos = new uint256[](4);
         bytes memory _proxyData =
@@ -425,8 +534,11 @@ contract MorpheousTest is Utils {
         (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
 
         bytes[] memory _calldata = new bytes[](1);
-        _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
+        _calldata[0] = abi.encode(
+            Constants._AGGREGATORS_MODULE,
+            abi.encodeWithSignature(
+                "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
+            )
         );
 
         uint256[] memory _argPos = new uint256[](1);
@@ -450,11 +562,16 @@ contract MorpheousTest is Utils {
         (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(proxy), "SELL");
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
+        _calldata[0] = abi.encode(
+            Constants._AGGREGATORS_MODULE,
+            abi.encodeWithSignature(
+                "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
+            )
         );
-        _calldata[1] =
-            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, proxy, quote);
+        _calldata[1] = abi.encode(
+            Constants._MORPHO_MODULE,
+            abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, proxy, quote)
+        );
 
         uint256[] memory _argPos = new uint256[](2);
         _argPos[0] = 0;

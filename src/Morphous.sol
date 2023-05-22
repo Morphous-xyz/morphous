@@ -5,15 +5,16 @@ import "test/utils/Utils.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {TokenActions} from "src/actions/TokenActions.sol";
-import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
+import {IZion} from "src/interfaces/IZion.sol";
+import {Zion} from "src/Zion.sol";
+import {Owned} from "solmate/auth/Owned.sol";
 
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morphous is MorphoRouter, TokenActions {
+contract Morphous is Zion, Owned(msg.sender) {
     /// @notice Address of this contract.
-    address public immutable _MORPHEUS;
+    IZion internal immutable _ZION;
 
     /// @notice Checks if timestamp is not expired
     /// @param deadline Timestamp to not be expired.
@@ -23,7 +24,20 @@ contract Morphous is MorphoRouter, TokenActions {
     }
 
     constructor() {
-        _MORPHEUS = address(this);
+        _ZION = IZion(address(this));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- Zion functions
+    ///////////////////////////////////////////////////////////////
+
+    function getModule(bytes1 identifier) external view returns (address) {
+        return _getModule(identifier);
+    }
+
+    /// @notice Sees {Zion-_setModule}.
+    function setModule(bytes1 identifier, address module) external onlyOwner {
+        _setModule(identifier, module);
     }
 
     /// @notice Call multiple functions in the current contract and return the data from all of them if they all succeed
@@ -42,22 +56,29 @@ contract Morphous is MorphoRouter, TokenActions {
         results = new bytes32[](data.length);
 
         uint256 _argPos;
-        uint256 _lentgh = data.length;
+        uint256 _length = data.length;
 
-        for (uint256 i = 0; i < _lentgh;) {
+        for (uint256 i = 0; i < _length;) {
+            // Decode the first item of the array into a module identifier and the associated function data
+            (bytes1 _moduleIdentifier, bytes memory _moduleData) = abi.decode(data[i], (bytes1, bytes));
+
+            // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
+            address module = _ZION.getModule(_moduleIdentifier);
+
             _argPos = argPos[i];
+
             if (i > 0 && _argPos > 0) {
                 uint256 _argToUpdate = argPos[i];
-                bytes memory _updatedData = data[i];
+                bytes memory _updatedData = _moduleData;
                 uint256 _previousCallResult = uint256(results[i - 1]);
 
                 assembly {
                     mstore(add(_updatedData, add(_argToUpdate, 0x20)), _previousCallResult)
                 }
 
-                results[i] = IDSProxy(address(this)).execute(_MORPHEUS, _updatedData);
+                results[i] = IDSProxy(address(this)).execute(module, _updatedData);
             } else {
-                results[i] = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
+                results[i] = IDSProxy(address(this)).execute(module, _moduleData);
             }
 
             unchecked {
