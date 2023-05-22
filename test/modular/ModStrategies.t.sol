@@ -11,7 +11,7 @@ import {Morphous, Constants} from "src/Morphous.sol";
 import {LibString} from "solady/utils/LibString.sol";
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {FL} from "src/actions/flashloan/FL.sol";
+import {FL} from "src/FL.sol";
 
 contract StrategiesTest is Utils {
     Neo neo;
