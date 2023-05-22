@@ -4,3 +4,4 @@ broadcast/
 .env
 
 .vscode/settings.json
+src/.solcx-lock-0.8.17
