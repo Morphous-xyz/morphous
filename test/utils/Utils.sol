@@ -22,7 +22,7 @@ abstract contract Utils is Test {
     {
         string[] memory inputs = new string[](8);
         inputs[0] = "python3";
-        inputs[1] = "test/python/get_quote_0x.py";
+        inputs[1] = "test/utils/python/get_quote_0x.py";
         inputs[2] = vm.toString(srcToken);
         inputs[3] = vm.toString(dstToken);
         inputs[4] = vm.toString(amount);

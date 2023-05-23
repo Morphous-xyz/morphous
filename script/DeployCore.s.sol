@@ -17,6 +17,9 @@ contract DeployCore is Script {
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
 
         morphous = new Morphous(); // Ensure event `OwnershipTransferred` was emitted.
+        if (morphous.owner() != address(this)) {
+            revert("!owner");
+        }
         fl = new FL(address(morphous));
         neo = new Neo(address(morphous), address(fl));
 

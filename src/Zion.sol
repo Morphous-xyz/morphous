@@ -21,11 +21,9 @@ abstract contract Zion is IZion {
      * @param identifier The identifier of the module.
      * @param module The address of the module.
      * @dev This function can only be called by the owner of the contract.
-     * If the module is already set for the identifier, it will revert the transaction.
+     * If the module is already set for the identifier, it will overwrite it.
      */
     function _setModule(bytes1 identifier, address module) internal {
-        require(modules[identifier] == address(0), "Module already set");
-
         modules[identifier] = module;
 
         // Emit the ModuleSet event after successfully setting the module.

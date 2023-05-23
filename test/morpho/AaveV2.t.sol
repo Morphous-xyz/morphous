@@ -224,7 +224,7 @@ contract AaveV2Test is BaseTest {
         assertEq(TokenUtils._balanceInOf(_token, address(this)), _amount);
     }
 
-    function testMorphoSupplyBorrowuhoh() public {
+    function testMorphoSupplyBorrow() public {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;

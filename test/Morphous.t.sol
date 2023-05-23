@@ -36,13 +36,13 @@ contract MorphousTest is BaseTest {
         morpheous.setModule(0x10, address(0xAbA));
     }
 
-    function testOwnerCannotOverwriteModule() public {
+    function testOwnerOverwriteModule() public {
         bytes1 identifier = 0x10;
         morpheous.setModule(identifier, address(0xAbA));
         assertEq(morpheous.getModule(identifier), address(0xAbA));
 
-        vm.expectRevert("Module already set");
         morpheous.setModule(identifier, address(0xCACA));
+        assertEq(morpheous.getModule(identifier), address(0xCACA));
     }
 
     function testGetUnsetModule() public {
