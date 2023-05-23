@@ -10,6 +10,10 @@ import {ModuleA, ModuleB} from "test/utils/TestModules.sol";
 /// @title MorphousTest
 /// @notice Test suite for the Morphous contract (Morphous Multicall + Zion registry)
 contract MorphousTest is BaseTest {
+    
+    // For test modules
+    event Log(uint256);
+    
     function setUp() public override {
         super.setUp();
     }
@@ -46,7 +50,7 @@ contract MorphousTest is BaseTest {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- MODULAR MORPHOUS
+    /// --- MORPHOUS
     ///////////////////////////////////////////////////////////////
 
     function testMulticall() public {
@@ -73,11 +77,14 @@ contract MorphousTest is BaseTest {
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", block.timestamp + 15, _calldata, _argPos);
 
         // Check that the modules were called correctly
-        /*
         vm.expectEmit(true, true, true, true);
         emit Log(1);
         emit Log(2);
-        */
+        
         proxy.execute(address(morpheous), _proxyData);
+    }
+
+    function testVersion() public {
+        assertEq(morpheous.version(), Constants._VERSION);
     }
 }

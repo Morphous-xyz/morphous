@@ -16,7 +16,7 @@ contract DeployCore is Script {
         // Utilize the `DEPLOYER_PK` env variable to deploy contracts.
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
 
-        morphous = new Morphous();
+        morphous = new Morphous(); // Ensure event `OwnershipTransferred` was emitted.
         fl = new FL(address(morphous));
         neo = new Neo(address(morphous), address(fl));
 
