@@ -12,6 +12,8 @@ import {Neo, TokenUtils} from "src/Neo.sol";
 import {BaseTest} from "test/BaseTest.sol";
 import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
+/// @title AaveV3Test
+/// @notice Test suite for the MorphoModule, all AAVE V3 functions
 contract AaveV3Test is BaseTest {
     function setUp() public override {
         super.setUp();

@@ -10,7 +10,7 @@ import {Morphous, Constants} from "src/Morphous.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
 import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 
-import "test/utils/Utils.sol";
+import {Utils, IMakerRegistry} from "test/utils/Utils.sol";
 
 abstract contract BaseTest is Utils {
     // Instance Variables

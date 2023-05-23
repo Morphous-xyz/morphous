@@ -18,6 +18,8 @@ import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 import {BaseTest} from "test/BaseTest.sol";
 import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
+/// @title StrategiesTest
+/// @notice Test suite for strategies (leverage and deleverage)
 contract StrategiesTest is BaseTest {
     function setUp() public override {
         super.setUp();
@@ -170,14 +172,5 @@ contract StrategiesTest is BaseTest {
             false
         );
         proxy.execute(address(neo), _proxyData);
-    }
-
-    /// @notice Helper function to deploy a contract from bytecode.
-    function deployBytecode(bytes memory bytecode, bytes memory args) private returns (address deployed) {
-        bytecode = abi.encodePacked(bytecode, args);
-        assembly {
-            deployed := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-        require(deployed != address(0), "DEPLOYMENT_FAILED");
     }
 }
