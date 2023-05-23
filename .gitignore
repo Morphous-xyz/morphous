@@ -5,3 +5,5 @@ broadcast/
 
 .vscode/settings.json
 src/.solcx-lock-0.8.17
+temp/
+.DS_Store
