@@ -36,7 +36,7 @@ coverage :
 # Coverage and write to an html (in coverage folder) 
 coverage-w :
 	forge coverage --report lcov --fork-url https://$NETWORK.infura.io/v3/$INFURA_KEY
-	lcov --remove ./lcov.info -o ./lcov.info.pruned 'test/*'
+	lcov --remove ./lcov.info -o ./lcov.info.pruned 'test/*' 'script/*'
 	genhtml ./lcov.info.pruned -o report --branch-coverage --output-dir ./coverage
 	rm ./lcov.info*
 

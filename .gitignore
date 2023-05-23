@@ -2,6 +2,7 @@ cache/
 out/
 broadcast/
 .env
+coverage/
 
 .vscode/settings.json
 src/.solcx-lock-0.8.17
