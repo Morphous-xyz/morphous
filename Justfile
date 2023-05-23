@@ -47,6 +47,14 @@ mythril PATH CONTRACT_NAME :
 	cd temp/ && rm {{CONTRACT_NAME}}
 	cd ../
 
+# Deploy Morphous, Neo and FL
+deploy-core : 
+	forge script script/DeployCore.s.sol --fork-url https://$NETWORK.infura.io/v3/$INFURA_KEY  --broadcast --etherscan-api-key $ETHERSCAN_KEY --verify
+
+# Deploy modules and logger + adding modules to Morphous
+deploy-modules :
+	forge script script/DeployModules.s.sol --fork-url https://$NETWORK.infura.io/v3/$INFURA_KEY  --broadcast --etherscan-api-key $ETHERSCAN_KEY --verify
+
 # Removing all generated files
 clean:
 	forge clean && rm -rf temp && rm -rf coverage 
