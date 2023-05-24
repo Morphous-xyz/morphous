@@ -14,7 +14,7 @@ contract DeployModules is Script {
     AggregatorsModule aggregatorsModule;
     TokenActionsModule tokenActionsModule;
     MorphoModule morphoModule;
-    Morphous morpheous = Morphous(payable(0x1234567890123456789012345678901234567890)); // Replace with the actual address of the deployed Morphous contract.
+    Morphous morpheous = Morphous(payable(0xAeF22e74f7DcddEA150d779a4800e67319a960F3)); // Replace with the actual address of the deployed Morphous contract.
 
     function run() public {
         if (morpheous == Morphous(payable(0x1234567890123456789012345678901234567890))) {
@@ -31,6 +31,14 @@ contract DeployModules is Script {
         morpheous.setModule(Constants._AGGREGATORS_MODULE, address(aggregatorsModule));
         morpheous.setModule(Constants._TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
         morpheous.setModule(Constants._MORPHO_MODULE, address(morphoModule));
+
+        // Verifying all modules as been correctly setted 
+        if (morpheous.getModule(Constants._AGGREGATORS_MODULE) != address(aggregatorsModule) ||
+            morpheous.getModule(Constants._TOKEN_ACTIONS_MODULE) != address(tokenActionsModule) ||
+            morpheous.getModule(Constants._MORPHO_MODULE) != address(morphoModule)) {
+            revert("Modules not correctly setted");
+        }
+
 
         vm.stopBroadcast();
     }

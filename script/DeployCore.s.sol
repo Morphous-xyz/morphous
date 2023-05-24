@@ -13,11 +13,14 @@ contract DeployCore is Script {
     Morphous internal morphous;
 
     function run() public {
+        uint256 deployer = vm.envUint("DEPLOYER_PK");
+        address deployerAddress = vm.addr(deployer);
+        
         // Utilize the `DEPLOYER_PK` env variable to deploy contracts.
-        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
-
+        vm.startBroadcast(deployer);
+        
         morphous = new Morphous(); // Ensure event `OwnershipTransferred` was emitted.
-        if (morphous.owner() != address(this)) {
+        if (morphous.owner() != deployerAddress) {
             revert("!owner");
         }
         fl = new FL(address(morphous));
