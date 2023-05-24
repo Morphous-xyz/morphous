@@ -17,9 +17,6 @@ contract DeployModules is Script {
     Morphous morpheous = Morphous(payable(0xAeF22e74f7DcddEA150d779a4800e67319a960F3)); // Replace with the actual address of the deployed Morphous contract.
 
     function run() public {
-        if (morpheous == Morphous(payable(0x1234567890123456789012345678901234567890))) {
-            revert("Replace the address of the deployed Morphous contract.");
-        }
         // Utilize the `DEPLOYER_PK` env variable to deploy contracts.
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
 
