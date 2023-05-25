@@ -29,13 +29,14 @@ contract DeployModules is Script {
         morpheous.setModule(Constants._TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
         morpheous.setModule(Constants._MORPHO_MODULE, address(morphoModule));
 
-        // Verifying all modules as been correctly setted 
-        if (morpheous.getModule(Constants._AGGREGATORS_MODULE) != address(aggregatorsModule) ||
-            morpheous.getModule(Constants._TOKEN_ACTIONS_MODULE) != address(tokenActionsModule) ||
-            morpheous.getModule(Constants._MORPHO_MODULE) != address(morphoModule)) {
+        // Verifying all modules as been correctly setted
+        if (
+            morpheous.getModule(Constants._AGGREGATORS_MODULE) != address(aggregatorsModule)
+                || morpheous.getModule(Constants._TOKEN_ACTIONS_MODULE) != address(tokenActionsModule)
+                || morpheous.getModule(Constants._MORPHO_MODULE) != address(morphoModule)
+        ) {
             revert("Modules not correctly setted");
         }
-
 
         vm.stopBroadcast();
     }

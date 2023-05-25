@@ -86,7 +86,7 @@ contract Morphous is Zion, Owned(msg.sender) {
     }
 
     function version() external pure returns (string memory) {
-        return Constants._VERSION;
+        return "2.0.0";
     }
 
     receive() external payable {}

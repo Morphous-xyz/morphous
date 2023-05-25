@@ -3,9 +3,3 @@ verbosity       = 3
 fuzz-runs       = 10_000
 optimizers_runs = 24_000
 ffi             = true
-
-[rpc_endpoints]
-mainnet = "${RPC_URL_MAINNET}"
-
-[etherscan]
-mainnet = {key = "${ETHERSCAN_KEY}"}

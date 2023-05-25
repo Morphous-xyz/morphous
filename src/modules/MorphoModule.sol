@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.17;
 
-import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
-
-import {BaseModule} from "src/modules/BaseModule.sol";
-import {Constants} from "src/libraries/Constants.sol";
+import {Logger} from "src/Logger.sol";
 import {ICToken} from "src/interfaces/ICToken.sol";
 import {IMorpho} from "src/interfaces/IMorpho.sol";
-import {IPoolToken} from "src/interfaces/IPoolToken.sol";
-import {IRewardsDistributor} from "src/interfaces/IRewardsDistributor.sol";
-import {Logger} from "src/Logger.sol";
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Constants} from "src/libraries/Constants.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {IRewardsDistributor} from "src/interfaces/IRewardsDistributor.sol";
 
 contract MorphoModule is BaseModule {
     using SafeTransferLib for ERC20;
@@ -21,7 +20,7 @@ contract MorphoModule is BaseModule {
     constructor(Logger logger) BaseModule(logger) {}
 
     ////////////////////////////////////////////////////////////////
-    /// --- Core
+    /// --- CORE
     ///////////////////////////////////////////////////////////////
 
     modifier onlyValidMarket(address _market) {
@@ -42,7 +41,7 @@ contract MorphoModule is BaseModule {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- Borrow / Repay
+    /// --- BORROW / REPAY
     ///////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////
@@ -98,7 +97,7 @@ contract MorphoModule is BaseModule {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- Claim rewards
+    /// --- CLAIM REWARDS
     ///////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////
@@ -131,7 +130,7 @@ contract MorphoModule is BaseModule {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- Supply / Withdraw
+    /// --- SUPPLY / WITHDRAWk
     ///////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////

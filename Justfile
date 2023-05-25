@@ -1,8 +1,8 @@
 set dotenv-load := true
 
 # Default command
-default:
-  @just --list
+default: format
+	forge build
 
 # Install dependencies
 install:
