@@ -71,7 +71,6 @@ contract AggregatorsTest is BaseTest {
         );
 
         uint256[] memory _argPos = new uint256[](2);
-        _argPos[0] = 0;
         _argPos[1] = 4 + 96; // 4 for sig + 4th arguments starts at 96 bytes. (3 * 32 bytes)
 
         bytes memory _proxyData =

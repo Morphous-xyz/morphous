@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.20;
 
+import {Registry} from "src/Registry.sol";
+import {Owned} from "solmate/auth/Owned.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
 import {IRegistry} from "src/interfaces/IRegistry.sol";
-import {Registry} from "src/Registry.sol";
-import {Owned} from "solmate/auth/Owned.sol";
 
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.

@@ -118,11 +118,11 @@ contract MorphoModule is BaseModule {
     /// @param underlying The underlying token to repay.
     /// @param amount The amount to repay.
     /// @param onBehalf The address on whose behalf to repay.
-    function repay(address underlying, uint256 amount, address onBehalf) external {
+    function repay(address underlying, uint256 amount, address onBehalf) external returns (uint256) {
         TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
-        IMorpho(Constants._MORPHO_AAVE_V3).repay(underlying, onBehalf, amount);
+        LOGGER.log("Repay_V2", abi.encode(underlying, amount, onBehalf));
 
-        LOGGER.log("Repay_V2", abi.encode(underlying, onBehalf, amount));
+        return IMorpho(Constants._MORPHO_AAVE_V3).repay(underlying, amount, onBehalf);
     }
 
     ////////////////////////////////////////////////////////////////

@@ -8,18 +8,18 @@ import {IRegistry} from "src/interfaces/IRegistry.sol";
 /// @dev This contract is used for the Multicall to know which module call.
 /// @dev That module structure allows us to upgrade the system without having to redeploy the whole system.
 abstract contract Registry is IRegistry {
-    // Mapping to store the contract modules in the system.
-    // The key is a bytes1 identifier and the value is the contract address.
-    /// Can have up to 256 modules.
+    /// @notice Mapping to store the contract modules in the system.
+    /// @dev The key is a bytes1 identifier and the value is the contract address.
+    //// Can have up to 256 modules.
     mapping(bytes1 => address) internal modules;
 
     event ModuleSet(bytes1 indexed identifier, address indexed module);
 
-    // @notice Set a module for a given identifier.
-    // @param identifier The identifier of the module.
-    // @param module The address of the module.
-    // @dev This function can only be called by the owner of the contract.
-    // If the module is already set for the identifier, it will overwrite it.
+    /// @notice Set a module for a given identifier.
+    /// @param identifier The identifier of the module.
+    /// @param module The address of the module.
+    /// @dev This function can only be called by the owner of the contract.
+    /// If the module is already set for the identifier, it will overwrite it.
     function _setModule(bytes1 identifier, address module) internal {
         modules[identifier] = module;
 

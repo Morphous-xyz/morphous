@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.20;
 
-import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
+import "test/utils/Utils.sol";
 import {FL} from "src/FL.sol";
-import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Logger} from "src/Logger.sol";
-import {MorphoModule} from "src/modules/MorphoModule.sol";
-import {Morphous, Constants} from "src/Morphous.sol";
 import {Neo, TokenUtils} from "src/Neo.sol";
+import {IDSProxy} from "src/interfaces/IDSProxy.sol";
+import {Morphous, Constants} from "src/Morphous.sol";
+import {MorphoModule} from "src/modules/MorphoModule.sol";
+import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
-
-import {Utils, IMakerRegistry} from "test/utils/Utils.sol";
 
 abstract contract BaseTest is Utils {
     // Instance Variables
+
+    FL fl;
     Neo neo;
     IDSProxy proxy;
     Logger logger;
     Morphous morpheous;
-    FL fl;
 
     // Constants
     address internal constant _LOGGER_PLACEHOLDER = 0x1234567890123456789012345678901234567890;

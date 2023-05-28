@@ -55,6 +55,18 @@ contract TokenActionsModule is BaseModule {
         TokenUtils._depositWETH(_amount);
     }
 
+    /// @notice Wraps a certain amount of stETH
+    /// @param _amount The amount of stETH to wrap
+    function wrapstETH(uint256 _amount) external returns (uint256) {
+        return TokenUtils._wrapstETH(_amount);
+    }
+
+    /// @notice Unwraps a certain amount of stETH
+    /// @param _amount The amount of stETH to unwrap
+    function unwrapstETH(uint256 _amount) external returns (uint256) {
+        return TokenUtils._unwrapstETH(_amount);
+    }
+
     /// @notice Withdraws a certain amount of WETH
     /// @param _amount The amount of WETH to withdraw
     function withdrawWETH(uint256 _amount) external {

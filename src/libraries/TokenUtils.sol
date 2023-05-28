@@ -53,6 +53,15 @@ library TokenUtils {
         ILido(Constants._stETH).submit{value: _amount}(address(this));
     }
 
+    function _wrapstETH(uint256 _amount) internal returns (uint256) {
+        _approve(Constants._stETH, Constants._wstETH, _amount);
+        return ILido(Constants._wstETH).wrap(_amount);
+    }
+
+    function _unwrapstETH(uint256 _amount) internal returns (uint256) {
+        return ILido(Constants._wstETH).unwrap(_amount);
+    }
+
     function _depositWETH(uint256 _amount) internal {
         IWETH(Constants._WETH).deposit{value: _amount}();
     }
