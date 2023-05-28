@@ -21,8 +21,7 @@ import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 /// @notice Test suite for strategies (leverage and deleverage)
 contract StrategiesV3Test is BaseTest {
     function setUp() public override {
-        uint256 _id = vm.createFork(vm.envString("RPC_URL_MAINNET"), 17174536); // Block number with Supply Cap not reached for wsETH.
-        vm.selectFork(_id);
+        vm.rollFork(17174536); // Block number with Supply Cap not reached for wsETH.
 
         super.setUp();
     }
