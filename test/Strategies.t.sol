@@ -47,7 +47,7 @@ contract StrategiesTest is BaseTest {
         assertEq(_totalSupplied, _amount + _toFlashloan);
         assertApproxEqAbs(_totalBorrowed, _toFlashloan, 1);
 
-        (, bytes memory txData) = getQuote(_stETH, Constants._WETH, _totalSupplied, address(_proxy), "SELL");
+        (, bytes memory txData) = getQuote(_stETH, Constants._WETH, _totalSupplied, "SELL");
 
         _deleverage(_poolSupplyToken, _poolBorrowToken, _proxy, _totalBorrowed, _totalSupplied, txData);
 

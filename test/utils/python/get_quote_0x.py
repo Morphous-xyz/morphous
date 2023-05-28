@@ -1,28 +1,27 @@
-import requests, sys, codecs
 from eth_abi import encode
+import requests, sys, codecs
 
 API_URL = "https://api.0x.org/swap/v1"
 
-def get_quote(
-    srcToken, dstToken, amount, side, network, receiver
-):
+
+def get_quote(srcToken, dstToken, amount, side):
     queryParams = {
         "sellToken": srcToken,
         "buyToken": dstToken,
-        "slippagePercentage": 0.03,
         "excludedSources": "Balancer"
     }
 
-    if(side == "SELL"):
+    if side == "SELL":
         queryParams["sellAmount"] = amount
-    elif(side=="BUY"):
-        queryParams["buyAmount"]= amount
+    elif side == "BUY":
+        queryParams["buyAmount"] = amount
 
     url = API_URL + "/quote"
     price_route = requests.get(url, params=queryParams).json()
 
-    dest_amount = price_route["buyAmount"] if side == "SELL" else price_route["sellAmount"]
-
+    dest_amount = (
+        price_route["buyAmount"] if side == "SELL" else price_route["sellAmount"]
+    )
 
     data = price_route["data"]
     data = encode(

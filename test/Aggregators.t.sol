@@ -16,9 +16,8 @@ contract AggregatorsTest is BaseTest {
     }
 
     function testGetQuote() public {
-        address _proxy = address(proxy);
         uint256 _amount = 1e18;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, "SELL");
         assertGt(quote, 0);
         assertGt(txData.length, 0);
     }
@@ -29,7 +28,7 @@ contract AggregatorsTest is BaseTest {
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(_proxy), "SELL");
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, "SELL");
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
@@ -57,7 +56,7 @@ contract AggregatorsTest is BaseTest {
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
-        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, address(proxy), "SELL");
+        (uint256 quote, bytes memory txData) = getQuote(Constants._ETH, _DAI, _amount, "SELL");
 
         bytes[] memory _calldata = new bytes[](2);
         _calldata[0] = abi.encode(
