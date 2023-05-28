@@ -1,10 +1,12 @@
 from eth_abi import encode
-import requests, sys, codecs
+import requests, sys, codecs, time
 
 API_URL = "https://api.0x.org/swap/v1"
 
 
 def get_quote(srcToken, dstToken, amount, side):
+    time.sleep(3)
+
     queryParams = {
         "sellToken": srcToken,
         "buyToken": dstToken,
