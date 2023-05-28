@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {FL} from "src/FL.sol";
@@ -29,6 +29,14 @@ abstract contract BaseTest is Utils {
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
 
+    ////////////////////////////////////////////////////////////////
+    /// --- MODULES
+    ///////////////////////////////////////////////////////////////
+
+    bytes1 internal constant _AGGREGATORS_MODULE = 0x01;
+    bytes1 internal constant _MORPHO_MODULE = 0x03;
+    bytes1 internal constant _TOKEN_ACTIONS_MODULE = 0x02;
+
     // Functions
     function setUp() public virtual {
         logger = new Logger();
@@ -41,9 +49,9 @@ abstract contract BaseTest is Utils {
         TokenActionsModule tokenActionsModule = new TokenActionsModule(logger);
         MorphoModule morphoModule = new MorphoModule(logger);
 
-        morpheous.setModule(Constants._AGGREGATORS_MODULE, address(aggregatorsModule));
-        morpheous.setModule(Constants._TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
-        morpheous.setModule(Constants._MORPHO_MODULE, address(morphoModule));
+        morpheous.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
+        morpheous.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
+        morpheous.setModule(_MORPHO_MODULE, address(morphoModule));
     }
 
     function testInitialSetup() public {

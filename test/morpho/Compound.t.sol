@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 
@@ -26,10 +26,9 @@ contract CompoundTest is BaseTest {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
         );
 
@@ -53,18 +52,16 @@ contract CompoundTest is BaseTest {
 
         bytes[] memory _calldata = new bytes[](4);
 
-        _calldata[0] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, _proxy, _amount)
         );
         _calldata[2] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
         );
-        _calldata[3] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
+        _calldata[3] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
         uint256[] memory _argPos = new uint256[](4);
         bytes memory _proxyData =

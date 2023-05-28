@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
@@ -33,10 +33,9 @@ contract AaveV3Test is BaseTest {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](2);
-        _calldata[0] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supply(address,uint256,address,uint256)", _token, _amount, _proxy, 4)
         );
 
@@ -60,20 +59,18 @@ contract AaveV3Test is BaseTest {
         uint256 _deadline = block.timestamp + 15;
 
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supply(address,uint256,address,uint256)", _token, _amount, _proxy, 4)
         );
         _calldata[2] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature(
                 "withdraw(address,uint256,address,address,uint256)", _token, _amount, _proxy, _proxy, 4
             )
         );
-        _calldata[3] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
+        _calldata[3] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](4));
@@ -100,15 +97,15 @@ contract AaveV3Test is BaseTest {
 
         bytes[] memory _calldata = new bytes[](3);
         _calldata[0] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE,
+            _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transferFrom(address,address,uint256)", _supplyToken, address(this), _amount)
         );
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supplyCollateral(address,uint256,address)", _supplyToken, _amount, _proxy)
         );
         _calldata[2] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("borrow(address,uint256,address,address,uint256)", _token, 1e18, _proxy, _proxy, 4)
         );
 
@@ -124,14 +121,5 @@ contract AaveV3Test is BaseTest {
         assertApproxEqAbs(_totalBalance, _amount, 4);
         assertApproxEqAbs(_totalBorrowed, 1e18, 4);
         assertApproxEqAbs(ERC20(_token).balanceOf(_proxy), 1e18, 4);
-    }
-
-    /// @notice Helper function to deploy a contract from bytecode.
-    function deployBytecode(bytes memory bytecode, bytes memory args) private returns (address deployed) {
-        bytecode = abi.encodePacked(bytecode, args);
-        assembly {
-            deployed := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-        require(deployed != address(0), "DEPLOYMENT_FAILED");
     }
 }

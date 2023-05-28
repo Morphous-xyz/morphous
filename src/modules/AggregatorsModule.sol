@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
@@ -52,6 +52,6 @@ contract AggregatorsModule is BaseModule {
             received = ERC20(destToken).balanceOf(address(this)) - before;
         }
 
-        LOGGER.logExchangeAggregator(srcToken, destToken, underlyingAmount, received);
+        LOGGER.log("Swap", abi.encode(srcToken, destToken, underlyingAmount, received));
     }
 }

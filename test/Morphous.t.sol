@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {Constants} from "src/Morphous.sol";
 
@@ -8,7 +8,7 @@ import {BaseTest} from "test/BaseTest.sol";
 import {ModuleA, ModuleB} from "test/utils/TestModules.sol";
 
 /// @title MorphousTest
-/// @notice Test suite for the Morphous contract (Morphous Multicall + Zion registry)
+/// @notice Test suite for the Morphous contract (Morphous Multicall + Registry registry)
 contract MorphousTest is BaseTest {
     // For test modules
     event Log(uint256);
@@ -18,7 +18,7 @@ contract MorphousTest is BaseTest {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- ZION
+    /// --- Registry
     ///////////////////////////////////////////////////////////////
 
     function testOwnerSetModule() public {
@@ -57,7 +57,7 @@ contract MorphousTest is BaseTest {
         ModuleA moduleA = new ModuleA();
         ModuleB moduleB = new ModuleB();
 
-        // Set modules in Zion
+        // Set modules in Registry
         bytes1 identifierA = 0x10;
         bytes1 identifierB = 0x11;
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 
@@ -33,7 +33,7 @@ contract AggregatorsTest is BaseTest {
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
-            Constants._AGGREGATORS_MODULE,
+            _AGGREGATORS_MODULE,
             abi.encodeWithSignature(
                 "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
             )
@@ -61,13 +61,13 @@ contract AggregatorsTest is BaseTest {
 
         bytes[] memory _calldata = new bytes[](2);
         _calldata[0] = abi.encode(
-            Constants._AGGREGATORS_MODULE,
+            _AGGREGATORS_MODULE,
             abi.encodeWithSignature(
                 "exchange(address,address,address,uint256,bytes)", ZERO_EX_ROUTER, Constants._ETH, _DAI, _amount, txData
             )
         );
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, proxy, quote)
         );
 

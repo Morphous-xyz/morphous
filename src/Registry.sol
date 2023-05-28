@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
-import {IZion} from "src/interfaces/IZion.sol";
+import {IRegistry} from "src/interfaces/IRegistry.sol";
 
-/// @title Zion
-/// @notice Zion is a registry for all the contracts in the system.
+/// @title Registry
+/// @notice Registry for all the contracts in the system.
 /// @dev This contract is used for the Multicall to know which module call.
 /// @dev That module structure allows us to upgrade the system without having to redeploy the whole system.
-abstract contract Zion is IZion {
+abstract contract Registry is IRegistry {
     // Mapping to store the contract modules in the system.
     // The key is a bytes1 identifier and the value is the contract address.
+    /// Can have up to 256 modules.
     mapping(bytes1 => address) internal modules;
 
     event ModuleSet(bytes1 indexed identifier, address indexed module);

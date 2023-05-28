@@ -20,6 +20,10 @@ build: format
 test: 
 	forge test --fork-url $RPC_URL_MAINNET
 
+# Gas snapshot
+snapshot: 
+	forge snapshot --fork-url $RPC_URL_MAINNET
+
 # Testing specific contract (regex contract name)
 test-c CONTRACT_NAME :
 	forge test --match-contract {{CONTRACT_NAME}}  --fork-url $RPC_URL_MAINNET

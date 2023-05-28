@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {Constants} from "src/Morphous.sol";
 
@@ -21,7 +21,7 @@ contract FlashloanTest is BaseTest {
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE,
+            _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount)
         );
         uint256[] memory _argPos = new uint256[](1);
@@ -53,7 +53,7 @@ contract FlashloanTest is BaseTest {
 
         bytes[] memory _calldata = new bytes[](1);
         _calldata[0] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE,
+            _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount + _fee)
         );
 

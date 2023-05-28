@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {WETH} from "solmate/tokens/WETH.sol";
@@ -77,23 +77,21 @@ contract StrategiesTest is BaseTest {
         /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](5);
 
-        _calldata[0] =
-            abi.encode(Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan));
-        _calldata[1] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan)
-        );
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan));
+        _calldata[1] =
+            abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan));
         _calldata[2] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature(
                 "supply(address,address,address,uint256)", _market, _poolSupplyToken, _proxy, _amount + _toFlashloan
             )
         );
         _calldata[3] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolBorrowToken, _toFlashloan)
         );
         _calldata[4] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE,
+            _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _toFlashloan)
         );
 
@@ -129,17 +127,17 @@ contract StrategiesTest is BaseTest {
         bytes[] memory _calldata = new bytes[](4);
 
         _calldata[0] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature(
                 "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
             )
         );
         _calldata[1] = abi.encode(
-            Constants._MORPHO_MODULE,
+            _MORPHO_MODULE,
             abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max)
         );
         _calldata[2] = abi.encode(
-            Constants._AGGREGATORS_MODULE,
+            _AGGREGATORS_MODULE,
             abi.encodeWithSignature(
                 "exchange(address,address,address,uint256,bytes)",
                 ZERO_EX_ROUTER,
@@ -150,7 +148,7 @@ contract StrategiesTest is BaseTest {
             )
         );
         _calldata[3] = abi.encode(
-            Constants._TOKEN_ACTIONS_MODULE,
+            _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _totalBorrowed)
         );
 

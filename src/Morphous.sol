@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {IZion} from "src/interfaces/IZion.sol";
-import {Zion} from "src/Zion.sol";
+import {IRegistry} from "src/interfaces/IRegistry.sol";
+import {Registry} from "src/Registry.sol";
 import {Owned} from "solmate/auth/Owned.sol";
 
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morphous is Zion, Owned(msg.sender) {
+contract Morphous is Registry, Owned(msg.sender) {
     /// @notice Address of this contract.
-    IZion internal immutable _ZION;
+    IRegistry internal immutable _Registry;
 
     /// @notice Checks if timestamp is not expired
     /// @param deadline Timestamp to not be expired.
@@ -22,18 +22,18 @@ contract Morphous is Zion, Owned(msg.sender) {
     }
 
     constructor() {
-        _ZION = IZion(address(this));
+        _Registry = IRegistry(address(this));
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- Zion functions
+    /// --- Registry functions
     ///////////////////////////////////////////////////////////////
 
     function getModule(bytes1 identifier) external view returns (address) {
         return _getModule(identifier);
     }
 
-    /// @notice Sees {Zion-_setModule}.
+    /// @notice Sees {Registry-_setModule}.
     function setModule(bytes1 identifier, address module) external onlyOwner {
         _setModule(identifier, module);
     }
@@ -61,12 +61,12 @@ contract Morphous is Zion, Owned(msg.sender) {
             (bytes1 _moduleIdentifier, bytes memory _moduleData) = abi.decode(data[i], (bytes1, bytes));
 
             // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
-            address module = _ZION.getModule(_moduleIdentifier);
+            address module = _Registry.getModule(_moduleIdentifier);
 
             _argPos = argPos[i];
 
             if (i > 0 && _argPos > 0) {
-                uint256 _argToUpdate = argPos[i];
+                uint256 _argToUpdate = _argPos;
                 bytes memory _updatedData = _moduleData;
                 uint256 _previousCallResult = uint256(results[i - 1]);
 

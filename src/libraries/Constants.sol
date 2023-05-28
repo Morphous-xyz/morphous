@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 /// @notice Constants used in Morphous.
 library Constants {
@@ -36,14 +36,6 @@ library Constants {
 
     /// @notice Address of Factory Guard contract.
     address internal constant _FACTORY_GUARD_ADDRESS = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
-
-    ////////////////////////////////////////////////////////////////
-    /// --- MODULES
-    ///////////////////////////////////////////////////////////////
-
-    bytes1 internal constant _AGGREGATORS_MODULE = 0x01;
-    bytes1 internal constant _TOKEN_ACTIONS_MODULE = 0x02;
-    bytes1 internal constant _MORPHO_MODULE = 0x03;
 
     /////////////////////////////////////////////////////////////////
     /// --- ERRORS
