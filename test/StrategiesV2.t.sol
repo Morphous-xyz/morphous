@@ -1,51 +1,28 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
-import "test/utils/Utils.sol";
-
-import {Logger} from "src/logger/Logger.sol";
-import {Neo, TokenUtils} from "src/Neo.sol";
-import {WETH} from "solmate/tokens/WETH.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {Morphous, Constants} from "src/Morphous.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
 import {LibString} from "solady/utils/LibString.sol";
 
+import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
+import {FL} from "src/FL.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {FL} from "src/actions/flashloan/FL.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+import {Logger} from "src/Logger.sol";
+import {MorphoModule} from "src/modules/MorphoModule.sol";
+import {Morphous, Constants} from "src/Morphous.sol";
+import {Neo, TokenUtils} from "src/Neo.sol";
+import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 
-contract StrategiesTest is Utils {
-    Neo neo;
-    Logger logger;
-    IDSProxy proxy;
-    Morphous morpheous;
-    FL balancerFL;
+import {BaseTest} from "test/BaseTest.sol";
+import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
-    address internal constant _LOGGER_PLACEHOLDER = 0x1234567890123456789012345678901234567890;
-
-    address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
-    address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
-    address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
-    address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
-
-    function setUp() public {
-        // Assuming Logger is a library
-        logger = new Logger();
-
-        bytes memory _morphousByteCode = bytes(
-            LibString.replace(
-                string(abi.encodePacked(type(Morphous).creationCode)),
-                string(abi.encodePacked(_LOGGER_PLACEHOLDER)),
-                string(abi.encodePacked(address(logger)))
-            )
-        );
-
-        // Deploy the contract with the correct constant address.
-        morpheous = Morphous(payable(deployBytecode(_morphousByteCode, "")));
-
-        balancerFL = new FL(address(morpheous));
-        neo = new Neo(address(morpheous), address(balancerFL));
-        proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
+/// @title StrategiesTest
+/// @notice Test suite for strategies (leverage and deleverage)
+contract StrategiesV2Test is BaseTest {
+    function setUp() public override {
+        super.setUp();
     }
 
     ////////////////////////////////////////////////////////////////
@@ -70,7 +47,7 @@ contract StrategiesTest is Utils {
         assertEq(_totalSupplied, _amount + _toFlashloan);
         assertApproxEqAbs(_totalBorrowed, _toFlashloan, 1);
 
-        (, bytes memory txData) = getQuote(_stETH, Constants._WETH, _totalSupplied, address(_proxy), "SELL");
+        (, bytes memory txData) = getQuote(_stETH, Constants._WETH, _totalSupplied, "SELL");
 
         _deleverage(_poolSupplyToken, _poolBorrowToken, _proxy, _totalBorrowed, _totalSupplied, txData);
 
@@ -99,20 +76,28 @@ contract StrategiesTest is Utils {
 
         /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](5);
-        _calldata[0] = abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan);
-        _calldata[1] = abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan);
-        _calldata[2] = abi.encodeWithSignature(
-            "supply(address,address,address,uint256)", _market, _poolSupplyToken, _proxy, _amount + _toFlashloan
+
+        _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _toFlashloan));
+        _calldata[1] =
+            abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositSTETH(uint256)", _amount + _toFlashloan));
+        _calldata[2] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature(
+                "supply(address,address,address,uint256)", _market, _poolSupplyToken, _proxy, _amount + _toFlashloan
+            )
         );
-        _calldata[3] =
-            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolBorrowToken, _toFlashloan);
-        _calldata[4] = abi.encodeWithSignature(
-            "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _toFlashloan
+        _calldata[3] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature("borrow(address,address,uint256)", _market, _poolBorrowToken, _toFlashloan)
+        );
+        _calldata[4] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _toFlashloan)
         );
 
         bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, new uint256[](5));
 
-        // Flashlaon functions parameters.
+        // Flashloan functions parameters.
         address[] memory _tokens = new address[](1);
         _tokens[0] = _borrowToken;
         uint256[] memory _amounts = new uint256[](1);
@@ -140,21 +125,31 @@ contract StrategiesTest is Utils {
 
         /// Morphous calldata.
         bytes[] memory _calldata = new bytes[](4);
-        _calldata[0] = abi.encodeWithSignature(
-            "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
+
+        _calldata[0] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature(
+                "repay(address,address,address,uint256)", _market, _poolBorrowToken, _proxy, type(uint256).max
+            )
         );
-        _calldata[1] =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max);
-        _calldata[2] = abi.encodeWithSignature(
-            "exchange(address,address,address,uint256,bytes)",
-            ZERO_EX_ROUTER,
-            _supplyToken,
-            _borrowToken,
-            _quote,
-            _txData
+        _calldata[1] = abi.encode(
+            _MORPHO_MODULE,
+            abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolSupplyToken, type(uint256).max)
         );
-        _calldata[3] = abi.encodeWithSignature(
-            "transfer(address,address,uint256)", _borrowToken, address(balancerFL), _totalBorrowed
+        _calldata[2] = abi.encode(
+            _AGGREGATORS_MODULE,
+            abi.encodeWithSignature(
+                "exchange(address,address,address,uint256,bytes)",
+                ZERO_EX_ROUTER,
+                _supplyToken,
+                _borrowToken,
+                _quote,
+                _txData
+            )
+        );
+        _calldata[3] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _totalBorrowed)
         );
 
         bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, new uint256[](4));
@@ -175,14 +170,5 @@ contract StrategiesTest is Utils {
             false
         );
         proxy.execute(address(neo), _proxyData);
-    }
-
-    /// @notice Helper function to deploy a contract from bytecode.
-    function deployBytecode(bytes memory bytecode, bytes memory args) private returns (address deployed) {
-        bytecode = abi.encodePacked(bytecode, args);
-        assembly {
-            deployed := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-        require(deployed != address(0), "DEPLOYMENT_FAILED");
     }
 }

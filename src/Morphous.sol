@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
-import "test/utils/Utils.sol";
-
+import {Registry} from "src/Registry.sol";
+import {Owned} from "solmate/auth/Owned.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {TokenActions} from "src/actions/TokenActions.sol";
-import {MorphoRouter} from "src/actions/morpho/MorphoRouter.sol";
+import {IRegistry} from "src/interfaces/IRegistry.sol";
 
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morphous is MorphoRouter, TokenActions {
+contract Morphous is Registry, Owned(msg.sender) {
     /// @notice Address of this contract.
-    address public immutable _MORPHEUS;
+    IRegistry internal immutable _Registry;
 
     /// @notice Checks if timestamp is not expired
     /// @param deadline Timestamp to not be expired.
@@ -23,7 +22,21 @@ contract Morphous is MorphoRouter, TokenActions {
     }
 
     constructor() {
-        _MORPHEUS = address(this);
+        _Registry = IRegistry(address(this));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// --- REGISTRY FUNCTIONS
+    ///////////////////////////////////////////////////////////////
+
+    /// @notice Sees {Registry-_getModule}.
+    function getModule(bytes1 identifier) external view returns (address) {
+        return _getModule(identifier);
+    }
+
+    /// @notice Sees {Registry-_setModule}.
+    function setModule(bytes1 identifier, address module) external onlyOwner {
+        _setModule(identifier, module);
     }
 
     /// @notice Call multiple functions in the current contract and return the data from all of them if they all succeed
@@ -42,22 +55,26 @@ contract Morphous is MorphoRouter, TokenActions {
         results = new bytes32[](data.length);
 
         uint256 _argPos;
-        uint256 _lentgh = data.length;
+        uint256 _length = data.length;
 
-        for (uint256 i = 0; i < _lentgh;) {
+        for (uint256 i = 0; i < _length;) {
+            // Decode the first item of the array into a module identifier and the associated function data
+            (bytes1 _moduleIdentifier, bytes memory _moduleData) = abi.decode(data[i], (bytes1, bytes));
+
             _argPos = argPos[i];
+
             if (i > 0 && _argPos > 0) {
-                uint256 _argToUpdate = argPos[i];
-                bytes memory _updatedData = data[i];
+                uint256 _argToUpdate = _argPos;
+                bytes memory _updatedData = _moduleData;
                 uint256 _previousCallResult = uint256(results[i - 1]);
 
                 assembly {
                     mstore(add(_updatedData, add(_argToUpdate, 0x20)), _previousCallResult)
                 }
 
-                results[i] = IDSProxy(address(this)).execute(_MORPHEUS, _updatedData);
+                results[i] = IDSProxy(address(this)).execute(_Registry.getModule(_moduleIdentifier), _updatedData);
             } else {
-                results[i] = IDSProxy(address(this)).execute(_MORPHEUS, data[i]);
+                results[i] = IDSProxy(address(this)).execute(_Registry.getModule(_moduleIdentifier), _moduleData);
             }
 
             unchecked {

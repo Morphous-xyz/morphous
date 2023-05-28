@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
-import {LogCore} from "src/logger/LogCore.sol";
-import {Constants} from "src/libraries/Constants.sol";
-import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Constants} from "src/libraries/Constants.sol";
+import {Logger} from "src/Logger.sol";
+import {TokenUtils} from "src/libraries/TokenUtils.sol";
+
 /// @notice Contract that allows to swap tokens through different aggregators.
-abstract contract Aggregators is LogCore {
+contract AggregatorsModule is BaseModule {
     using SafeTransferLib for ERC20;
 
     /// @notice Error when swap fails.
@@ -18,6 +20,8 @@ abstract contract Aggregators is LogCore {
 
     /// @notice 1nch Router v5 contract address.
     address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
+
+    constructor(Logger logger) BaseModule(logger) {}
 
     modifier onlyValidAggregator(address _aggregator) {
         if (_aggregator != ZERO_EX_ROUTER && _aggregator != INCH_ROUTER) revert Constants.INVALID_AGGREGATOR();
@@ -48,6 +52,6 @@ abstract contract Aggregators is LogCore {
             received = ERC20(destToken).balanceOf(address(this)) - before;
         }
 
-        LOGGER.logExchangeAggregator(srcToken, destToken, underlyingAmount, received);
+        LOGGER.log("Swap", abi.encode(srcToken, destToken, underlyingAmount, received));
     }
 }

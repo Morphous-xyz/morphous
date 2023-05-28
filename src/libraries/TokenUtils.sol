@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {IWETH} from "src/interfaces/IWETH.sol";
 import {ILido} from "src/interfaces/ILido.sol";
@@ -51,6 +51,15 @@ library TokenUtils {
 
     function _depositSTETH(uint256 _amount) internal {
         ILido(Constants._stETH).submit{value: _amount}(address(this));
+    }
+
+    function _wrapstETH(uint256 _amount) internal returns (uint256) {
+        _approve(Constants._stETH, Constants._wstETH, _amount);
+        return ILido(Constants._wstETH).wrap(_amount);
+    }
+
+    function _unwrapstETH(uint256 _amount) internal returns (uint256) {
+        return ILido(Constants._wstETH).unwrap(_amount);
     }
 
     function _depositWETH(uint256 _amount) internal {

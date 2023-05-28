@@ -2,4 +2,9 @@ cache/
 out/
 broadcast/
 .env
+coverage/
 
+.vscode/settings.json
+src/.solcx-lock-0.8.20
+temp/
+.DS_Store
