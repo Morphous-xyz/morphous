@@ -26,9 +26,10 @@ contract Morphous is Registry, Owned(msg.sender) {
     }
 
     ////////////////////////////////////////////////////////////////
-    /// --- Registry functions
+    /// --- REGISTRY FUNCTIONS
     ///////////////////////////////////////////////////////////////
 
+    /// @notice Sees {Registry-_getModule}.
     function getModule(bytes1 identifier) external view returns (address) {
         return _getModule(identifier);
     }
@@ -60,9 +61,6 @@ contract Morphous is Registry, Owned(msg.sender) {
             // Decode the first item of the array into a module identifier and the associated function data
             (bytes1 _moduleIdentifier, bytes memory _moduleData) = abi.decode(data[i], (bytes1, bytes));
 
-            // Must make an external call due to `multicall` being called as a delegatecall, meaning we cannot retrieve directly from storage
-            address module = _Registry.getModule(_moduleIdentifier);
-
             _argPos = argPos[i];
 
             if (i > 0 && _argPos > 0) {
@@ -74,9 +72,9 @@ contract Morphous is Registry, Owned(msg.sender) {
                     mstore(add(_updatedData, add(_argToUpdate, 0x20)), _previousCallResult)
                 }
 
-                results[i] = IDSProxy(address(this)).execute(module, _updatedData);
+                results[i] = IDSProxy(address(this)).execute(_Registry.getModule(_moduleIdentifier), _updatedData);
             } else {
-                results[i] = IDSProxy(address(this)).execute(module, _moduleData);
+                results[i] = IDSProxy(address(this)).execute(_Registry.getModule(_moduleIdentifier), _moduleData);
             }
 
             unchecked {

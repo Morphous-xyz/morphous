@@ -8,13 +8,25 @@ import {IFlashLoan} from "src/interfaces/IFlashLoan.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {IFlashLoanRecipient} from "src/interfaces/IFlashLoanRecipient.sol";
 
+/// @title FlashLoan contract for Aave and Balancer flash loans
+/// @notice This contract allows for flash loans from Aave and Balancer, as well as executing arbitrary transactions via a DSProxy contract.
+/// @author @Mutative_
 contract FL is ReentrancyGuard, IFlashLoanRecipient {
+    /// @notice Address of the MORPHOUS contract
+    /// @dev This is immutable and set during contract deployment
     address public immutable MORPHOUS;
 
+    /// @notice Contract constructor that sets the MORPHOUS contract address
+    /// @param morpheus The address of the MORPHOUS contract
     constructor(address morpheus) {
         MORPHOUS = morpheus;
     }
 
+    /// @notice Initiates a flash loan from either Aave or Balancer
+    /// @param _tokens Array of token addresses for the flash loan
+    /// @param _amounts Array of amounts for each token to be borrowed
+    /// @param _data Additional data to be passed to the callback function
+    /// @param isAave If true, the flash loan is taken from Aave, otherwise from Balancer
     function flashLoan(address[] memory _tokens, uint256[] memory _amounts, bytes calldata _data, bool isAave)
         external
     {
@@ -28,7 +40,12 @@ contract FL is ReentrancyGuard, IFlashLoanRecipient {
         }
     }
 
-    /// @notice Balancer FL callback function that executes _userData logic through Morphous.
+    /// @notice The callback function for Balancer flash loans
+    /// @dev This function executes arbitrary logic through the MORPHOUS contract
+    /// @param _tokens Array of token addresses for the flash loan
+    /// @param _amounts Array of amounts for each token borrowed
+    /// @param _feeAmounts Array of fees for each token borrowed
+    /// @param _userData Additional data for execution
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -53,7 +70,14 @@ contract FL is ReentrancyGuard, IFlashLoanRecipient {
         }
     }
 
-    /// @notice Aave FL callback function that executes _userData logic through Morphous.
+    /// @notice The callback function for Aave flash loans
+    /// @dev This function executes arbitrary logic through the MORPHOUS contract
+    /// @param _tokens Array of token addresses for the flash loan
+    /// @param _amounts Array of amounts for each token borrowed
+    /// @param _feeAmounts Array of fees for each token borrowed
+    /// @param _initiator Address of the initiator of the flash loan
+    /// @param _userData Additional data for execution
+    /// @return Returns true if the execution was successful
     function executeOperation(
         address[] memory _tokens,
         uint256[] memory _amounts,

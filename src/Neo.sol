@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {Constants} from "src/libraries/Constants.sol";
-import {IMorpheus} from "src/interfaces/IMorpheus.sol";
+import {IMorphous} from "src/interfaces/IMorphous.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {IFlashLoanHandler} from "src/interfaces/IFlashLoan.sol";
 import {ProxyPermission} from "src/ds-proxy/ProxyPermission.sol";
@@ -13,13 +13,13 @@ import {ProxyPermission} from "src/ds-proxy/ProxyPermission.sol";
 /// @author @Mutative_
 contract Neo is ProxyPermission {
     /// @notice Morphous address.
-    IMorpheus internal immutable _MORPHEUS;
+    IMorphous public immutable _MORPHOUS;
 
     /// @notice Balancer Flash loan address.
-    IFlashLoanHandler internal immutable _FLASH_LOAN;
+    IFlashLoanHandler public immutable _FLASH_LOAN;
 
-    constructor(address _morpheus, address _flashLoan) {
-        _MORPHEUS = IMorpheus(_morpheus);
+    constructor(address _morphous, address _flashLoan) {
+        _MORPHOUS = IMorphous(_morphous);
         _FLASH_LOAN = IFlashLoanHandler(_flashLoan);
     }
 
@@ -54,7 +54,7 @@ contract Neo is ProxyPermission {
         }
 
         // Execute flash loan.
-        IDSProxy(address(this)).execute(address(_MORPHEUS), data);
+        IDSProxy(address(this)).execute(address(_MORPHOUS), data);
 
         for (uint256 i = 0; i < length; i++) {
             uint256 _amount = TokenUtils._balanceInOf(tokens[i], address(this)) - balancesBefore[i];
