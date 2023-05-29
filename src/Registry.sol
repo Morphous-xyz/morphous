@@ -6,7 +6,6 @@ import {IRegistry} from "src/interfaces/IRegistry.sol";
 /// @title Registry
 /// @notice Registry for all the contracts in the system.
 /// @dev This contract is used for the Multicall to know which module call.
-/// @dev That module structure allows us to upgrade the system without having to redeploy the whole system.
 abstract contract Registry is IRegistry {
     /// @notice Mapping to store the contract modules in the system.
     /// @dev The key is a bytes1 identifier and the value is the contract address.

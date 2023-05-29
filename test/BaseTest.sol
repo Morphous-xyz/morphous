@@ -25,6 +25,7 @@ abstract contract BaseTest is Utils {
     address internal constant _DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
     address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
+    address public constant ODOS_ROUTER = 0x76f4eeD9fE41262669D0250b2A97db79712aD855;
     address internal constant _MAKER_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
     address internal constant _MORPHO_AAVE_LENS = 0x507fA343d0A90786d86C7cd885f5C49263A91FF4;
     address internal constant _MORPHO_COMPOUND_LENS = 0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67;
@@ -40,7 +41,7 @@ abstract contract BaseTest is Utils {
     // Functions
     function setUp() public virtual {
         logger = new Logger();
-        morpheous = new Morphous();
+        morpheous = new Morphous(address(this));
         fl = new FL(address(morpheous));
         neo = new Neo(address(morpheous), address(fl));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());

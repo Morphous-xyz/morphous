@@ -10,7 +10,7 @@ import {IRegistry} from "src/interfaces/IRegistry.sol";
 /// @title Morphous
 /// @notice Allows interaction with the Morpho protocol for DSProxy or any delegateCall type contract.
 /// @author @Mutative_
-contract Morphous is Registry, Owned(msg.sender) {
+contract Morphous is Registry, Owned {
     /// @notice Address of this contract.
     IRegistry internal immutable _Registry;
 
@@ -21,7 +21,7 @@ contract Morphous is Registry, Owned(msg.sender) {
         _;
     }
 
-    constructor() {
+    constructor(address _owner) Owned(_owner) {
         _Registry = IRegistry(address(this));
     }
 

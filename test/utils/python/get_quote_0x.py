@@ -10,7 +10,7 @@ def get_quote(srcToken, dstToken, amount, side):
     queryParams = {
         "sellToken": srcToken,
         "buyToken": dstToken,
-        "excludedSources": "Balancer"
+        "excludedSources": "Balancer",
     }
 
     if side == "SELL":

@@ -120,7 +120,7 @@ contract MorphoModule is BaseModule {
     /// @param onBehalf The address on whose behalf to repay.
     function repay(address underlying, uint256 amount, address onBehalf) external returns (uint256) {
         TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
-        LOGGER.log("Repay_V2", abi.encode(underlying, amount, onBehalf));
+        LOGGER.log("Repay_V3", abi.encode(underlying, amount, onBehalf));
 
         return IMorpho(Constants._MORPHO_AAVE_V3).repay(underlying, amount, onBehalf);
     }
@@ -217,7 +217,7 @@ contract MorphoModule is BaseModule {
     function withdraw(address _market, address _poolToken, uint256 _amount) external onlyValidMarket(_market) {
         IMorpho(_market).withdraw(_poolToken, _amount);
 
-        LOGGER.log("Withdraw_V3", abi.encode(_poolToken, _amount));
+        LOGGER.log("Withdraw_V2", abi.encode(_poolToken, _amount));
     }
 
     ////////////////////////////////////////////////////////////////
