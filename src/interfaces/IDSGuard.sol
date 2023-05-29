@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 interface IDSGuard {
     function canCall(address src_, address dst_, bytes4 sig) external view returns (bool);

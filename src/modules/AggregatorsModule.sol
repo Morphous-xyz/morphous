@@ -1,30 +1,35 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
-import {Constants} from "src/libraries/Constants.sol";
-import {TokenUtils} from "src/libraries/TokenUtils.sol";
 import {ERC20, SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
+import {BaseModule} from "src/modules/BaseModule.sol";
+import {Constants} from "src/libraries/Constants.sol";
+import {Logger} from "src/Logger.sol";
+import {TokenUtils} from "src/libraries/TokenUtils.sol";
+
 /// @notice Contract that allows to swap tokens through different aggregators.
-abstract contract Aggregators {
+contract AggregatorsModule is BaseModule {
     using SafeTransferLib for ERC20;
 
     /// @notice Error when swap fails.
     error SWAP_FAILED();
 
     /// @notice AugustusSwapper contract address.
-    address public constant AUGUSTUS = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
+    address public constant ZERO_EX_ROUTER = 0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
 
     /// @notice 1nch Router v5 contract address.
     address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
 
-    /// @notice Paraswap Token pull contract address.
-    address public constant TOKEN_TRANSFER_PROXY = 0x216B4B4Ba9F3e719726886d34a177484278Bfcae;
+    /// @notice OdoRouter contract address.
+    address public constant ODOS_ROUTER = 0x76f4eeD9fE41262669D0250b2A97db79712aD855;
 
-    event ExchangeAggregator(address _tokenFrom, address _tokenTo, uint256 _amountFrom, uint256 _amountTo);
+    constructor(Logger logger) BaseModule(logger) {}
 
     modifier onlyValidAggregator(address _aggregator) {
-        if (_aggregator != AUGUSTUS && _aggregator != INCH_ROUTER) revert Constants.INVALID_AGGREGATOR();
+        if (_aggregator != ZERO_EX_ROUTER && _aggregator != INCH_ROUTER && _aggregator != ODOS_ROUTER) {
+            revert Constants.INVALID_AGGREGATOR();
+        }
         _;
     }
 
@@ -41,7 +46,7 @@ abstract contract Aggregators {
         if (srcToken == Constants._ETH) {
             (success,) = aggregator.call{value: underlyingAmount}(callData);
         } else {
-            TokenUtils._approve(srcToken, aggregator == AUGUSTUS ? TOKEN_TRANSFER_PROXY : INCH_ROUTER, underlyingAmount);
+            TokenUtils._approve(srcToken, aggregator, underlyingAmount);
             (success,) = aggregator.call(callData);
         }
         if (!success) revert SWAP_FAILED();
@@ -52,6 +57,6 @@ abstract contract Aggregators {
             received = ERC20(destToken).balanceOf(address(this)) - before;
         }
 
-        emit ExchangeAggregator(srcToken, destToken, underlyingAmount, received);
+        LOGGER.log("Swap", abi.encode(srcToken, destToken, underlyingAmount, received));
     }
 }

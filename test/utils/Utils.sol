@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import "forge-std/Test.sol";
 
@@ -16,19 +16,33 @@ abstract contract Utils is Test {
         ILido(_stETH).submit{value: _amount}(address(this));
     }
 
-    function getQuote(address srcToken, address dstToken, uint256 amount, address receiver, string memory side)
+    function getQuote(address srcToken, address dstToken, uint256 amount, string memory side)
         internal
         returns (uint256 _quote, bytes memory data)
     {
-        string[] memory inputs = new string[](8);
+        string[] memory inputs = new string[](6);
         inputs[0] = "python3";
-        inputs[1] = "test/python/get_quote.py";
+        inputs[1] = "test/utils/python/get_quote_0x.py";
         inputs[2] = vm.toString(srcToken);
         inputs[3] = vm.toString(dstToken);
         inputs[4] = vm.toString(amount);
         inputs[5] = side;
-        inputs[6] = vm.toString(block.chainid);
-        inputs[7] = vm.toString(receiver);
+
+        return abi.decode(vm.ffi(inputs), (uint256, bytes));
+    }
+
+    function getQuoteOdos(address srcToken, address dstToken, uint256 amount, string memory side, address receiver)
+        internal
+        returns (uint256 _quote, bytes memory data)
+    {
+        string[] memory inputs = new string[](7);
+        inputs[0] = "python3";
+        inputs[1] = "test/utils/python/get_quote_odos.py";
+        inputs[2] = vm.toString(srcToken);
+        inputs[3] = vm.toString(dstToken);
+        inputs[4] = vm.toString(amount);
+        inputs[5] = side;
+        inputs[6] = vm.toString(receiver);
 
         return abi.decode(vm.ffi(inputs), (uint256, bytes));
     }
