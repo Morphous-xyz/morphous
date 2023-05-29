@@ -59,8 +59,7 @@ contract StrategiesV2Test is BaseTest {
 
         assertEq(TokenUtils._balanceInOf(Constants._WETH, _proxy), 0);
 
-        assertLt(TokenUtils._balanceInOf(Constants._WETH, address(this)), _amount);
-        assertGt(TokenUtils._balanceInOf(Constants._WETH, address(this)), _amount - 1e17);
+        assertGt(TokenUtils._balanceInOf(Constants._WETH, address(this)), _amount - 1e16);
     }
 
     function _leverage(

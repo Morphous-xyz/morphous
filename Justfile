@@ -52,11 +52,11 @@ mythril PATH CONTRACT_NAME :
 
 # Deploy Morphous, Neo and FL
 deploy-core : 
-	forge script script/DeployCore.s.sol --fork-url $RPC_URL_MAINNET  --broadcast
+	forge script script/DeployCore.s.sol --fork-url $RPC_URL_MAINNET --private-key $PRIVATE_KEY --broadcast --etherscan-api-key $ETHERSCAN_KEY --verify
 
 # Deploy modules and logger + adding modules to Morphous
 deploy-modules :
-	forge script script/DeployModules.s.sol --fork-url $RPC_URL_MAINNET  --broadcast
+	forge script script/DeployModules.s.sol --fork-url $RPC_URL_MAINNET --private-key $PRIVATE_KEY --broadcast --etherscan-api-key $ETHERSCAN_KEY --verify
 
 # Removing all generated files
 clean:

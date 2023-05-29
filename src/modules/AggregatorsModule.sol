@@ -21,10 +21,15 @@ contract AggregatorsModule is BaseModule {
     /// @notice 1nch Router v5 contract address.
     address public constant INCH_ROUTER = 0x1111111254EEB25477B68fb85Ed929f73A960582;
 
+    /// @notice OdoRouter contract address.
+    address public constant ODOS_ROUTER = 0x76f4eeD9fE41262669D0250b2A97db79712aD855;
+
     constructor(Logger logger) BaseModule(logger) {}
 
     modifier onlyValidAggregator(address _aggregator) {
-        if (_aggregator != ZERO_EX_ROUTER && _aggregator != INCH_ROUTER) revert Constants.INVALID_AGGREGATOR();
+        if (_aggregator != ZERO_EX_ROUTER && _aggregator != INCH_ROUTER && _aggregator != ODOS_ROUTER) {
+            revert Constants.INVALID_AGGREGATOR();
+        }
         _;
     }
 
