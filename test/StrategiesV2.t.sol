@@ -123,7 +123,7 @@ contract StrategiesV2Test is BaseTest {
         address _borrowToken = IPoolToken(_poolBorrowToken).UNDERLYING_ASSET_ADDRESS();
 
         /// Morphous calldata.
-        bytes[] memory _calldata = new bytes[](4);
+        bytes[] memory _calldata = new bytes[](5);
 
         _calldata[0] = abi.encode(
             _MORPHO_MODULE,
@@ -150,6 +150,10 @@ contract StrategiesV2Test is BaseTest {
             _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _totalBorrowed)
         );
+        _calldata[4] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(this), type(uint256).max)
+        );
 
         bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, new uint256[](4));
 
@@ -160,14 +164,9 @@ contract StrategiesV2Test is BaseTest {
         _amounts[0] = _totalBorrowed;
 
         bytes memory _proxyData = abi.encodeWithSignature(
-            "executeFlashloanWithReceiver(address[],address[],uint256[],bytes,address,bool)",
-            _tokens,
-            _tokens,
-            _amounts,
-            _flashLoanData,
-            address(this),
-            false
+            "executeFlashloan(address[],uint256[],bytes,bool)", _tokens, _amounts, _flashLoanData, false
         );
+
         proxy.execute(address(neo), _proxyData);
     }
 }

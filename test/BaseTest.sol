@@ -18,7 +18,7 @@ abstract contract BaseTest is Utils {
     Neo neo;
     IDSProxy proxy;
     Logger logger;
-    Morphous morpheous;
+    Morphous morphous;
 
     // Constants
     address internal constant _LOGGER_PLACEHOLDER = 0x1234567890123456789012345678901234567890;
@@ -41,18 +41,18 @@ abstract contract BaseTest is Utils {
     // Functions
     function setUp() public virtual {
         logger = new Logger();
-        morpheous = new Morphous(address(this));
-        fl = new FL(address(morpheous));
-        neo = new Neo(address(morpheous), address(fl));
+        morphous = new Morphous(address(this));
+        fl = new FL(address(morphous));
+        neo = new Neo(address(morphous), address(fl));
         proxy = IDSProxy(IMakerRegistry(_MAKER_REGISTRY).build());
 
         AggregatorsModule aggregatorsModule = new AggregatorsModule(logger);
         TokenActionsModule tokenActionsModule = new TokenActionsModule(logger);
         MorphoModule morphoModule = new MorphoModule(logger);
 
-        morpheous.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
-        morpheous.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
-        morpheous.setModule(_MORPHO_MODULE, address(morphoModule));
+        morphous.setModule(_AGGREGATORS_MODULE, address(aggregatorsModule));
+        morphous.setModule(_TOKEN_ACTIONS_MODULE, address(tokenActionsModule));
+        morphous.setModule(_MORPHO_MODULE, address(morphoModule));
     }
 
     function testInitialSetup() public {

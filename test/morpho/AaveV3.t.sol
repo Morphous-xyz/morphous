@@ -40,7 +40,7 @@ contract AaveV3Test is BaseTest {
         );
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).supplyBalance(_token, _proxy);
         assertApproxEqAbs(_totalBalance, _amount, 4);
@@ -72,7 +72,7 @@ contract AaveV3Test is BaseTest {
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](4));
 
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).supplyBalance(_token, _proxy);
         assertApproxEqAbs(_totalBalance, 0, 4);
@@ -107,7 +107,7 @@ contract AaveV3Test is BaseTest {
         );
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         uint256 _totalBorrowed = IMorphoLens(Constants._MORPHO_AAVE_V3).borrowBalance(_token, _proxy);
         uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).collateralBalance(_supplyToken, _proxy);

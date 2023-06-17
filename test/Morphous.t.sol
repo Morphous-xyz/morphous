@@ -23,29 +23,29 @@ contract MorphousTest is BaseTest {
 
     function testOwnerSetModule() public {
         bytes1 identifier = 0x10;
-        morpheous.setModule(identifier, address(0xAbA));
-        assertEq(morpheous.getModule(identifier), address(0xAbA));
+        morphous.setModule(identifier, address(0xAbA));
+        assertEq(morphous.getModule(identifier), address(0xAbA));
     }
 
     function testNonOwnerSetModule(address owner) public {
         vm.assume(owner != address(this));
-        morpheous.transferOwnership(owner);
+        morphous.transferOwnership(owner);
 
         vm.expectRevert("UNAUTHORIZED");
-        morpheous.setModule(0x10, address(0xAbA));
+        morphous.setModule(0x10, address(0xAbA));
     }
 
     function testOwnerOverwriteModule() public {
         bytes1 identifier = 0x10;
-        morpheous.setModule(identifier, address(0xAbA));
-        assertEq(morpheous.getModule(identifier), address(0xAbA));
+        morphous.setModule(identifier, address(0xAbA));
+        assertEq(morphous.getModule(identifier), address(0xAbA));
 
-        morpheous.setModule(identifier, address(0xCACA));
-        assertEq(morpheous.getModule(identifier), address(0xCACA));
+        morphous.setModule(identifier, address(0xCACA));
+        assertEq(morphous.getModule(identifier), address(0xCACA));
     }
 
     function testGetUnsetModule() public {
-        assertEq(morpheous.getModule(0x10), address(0));
+        assertEq(morphous.getModule(0x10), address(0));
     }
 
     ////////////////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ contract MorphousTest is BaseTest {
         bytes1 identifierA = 0x10;
         bytes1 identifierB = 0x11;
 
-        morpheous.setModule(identifierA, address(moduleA));
-        morpheous.setModule(identifierB, address(moduleB));
+        morphous.setModule(identifierA, address(moduleA));
+        morphous.setModule(identifierB, address(moduleB));
 
         // Encode call data
         bytes[] memory _calldata = new bytes[](2);
@@ -77,10 +77,10 @@ contract MorphousTest is BaseTest {
         emit Log(1);
         emit Log(2);
 
-        proxy.execute(address(morpheous), _proxyData);
+        proxy.execute(address(morphous), _proxyData);
     }
 
     function testVersion() public {
-        assertEq(morpheous.version(), "2.0.0");
+        assertEq(morphous.version(), "2.0.0");
     }
 }

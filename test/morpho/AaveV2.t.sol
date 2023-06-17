@@ -4,14 +4,16 @@ pragma solidity 0.8.20;
 import {ERC20} from "solmate/tokens/ERC20.sol";
 
 import {Constants} from "src/Morphous.sol";
-import {IPoolToken} from "src/interfaces/IPoolToken.sol";
-import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 import {BaseTest} from "test/BaseTest.sol";
 import {TokenUtils} from "src/libraries/TokenUtils.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
 /// @title AaveV2Test
 /// @notice Test suite for the MorphoModule, all AAVE V2 functions
 contract AaveV2Test is BaseTest {
+    address internal constant _WETH_MARKET = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
+
     function setUp() public override {
         super.setUp();
     }
@@ -20,7 +22,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -34,7 +36,7 @@ contract AaveV2Test is BaseTest {
         );
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         assertApproxEqAbs(_totalBalance, _amount, 1);
@@ -44,7 +46,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -65,7 +67,7 @@ contract AaveV2Test is BaseTest {
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](4));
 
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         assertApproxEqAbs(_totalBalance, 0, 1);
@@ -76,13 +78,13 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
         uint256 _deadline = block.timestamp + 15;
 
-        bytes[] memory _calldata = new bytes[](3);
+        bytes[] memory _calldata = new bytes[](4);
         _calldata[0] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("depositWETH(uint256)", _amount));
         _calldata[1] = abi.encode(
             _MORPHO_MODULE,
@@ -92,16 +94,16 @@ contract AaveV2Test is BaseTest {
             _MORPHO_MODULE,
             abi.encodeWithSignature("withdraw(address,address,uint256)", _market, _poolToken, _proxy, _amount)
         );
+        _calldata[3] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature(
+                "transfer(address,address,uint256)", Constants._WETH, address(this), type(uint256).max
+            )
+        );
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
-        address[] memory tokens = new address[](1);
-        tokens[0] = Constants._WETH;
-
-        bytes memory _neoData =
-            abi.encodeWithSignature("executeWithReceiver(address[],bytes,address)", tokens, _proxyData, address(this));
-
-        proxy.execute{value: _amount}(address(neo), _neoData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
 
@@ -114,7 +116,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -159,7 +161,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -169,7 +171,7 @@ contract AaveV2Test is BaseTest {
         deal(_token, address(this), _amount);
         ERC20(_token).approve(_proxy, _amount);
 
-        bytes[] memory _calldata = new bytes[](4);
+        bytes[] memory _calldata = new bytes[](5);
 
         _calldata[0] = abi.encode(
             _TOKEN_ACTIONS_MODULE,
@@ -187,6 +189,10 @@ contract AaveV2Test is BaseTest {
             _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(fl), _amount)
         );
+        _calldata[4] = abi.encode(
+            _TOKEN_ACTIONS_MODULE,
+            abi.encodeWithSignature("transfer(address,address,uint256)", _token, address(this), type(uint256).max)
+        );
 
         bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, new uint256[](4));
 
@@ -197,13 +203,7 @@ contract AaveV2Test is BaseTest {
         _amounts[0] = _amount;
 
         bytes memory _proxyData = abi.encodeWithSignature(
-            "executeFlashloanWithReceiver(address[],address[],uint256[],bytes,address,bool)",
-            _tokens,
-            _tokens,
-            _amounts,
-            _flashLoanData,
-            address(this),
-            false
+            "executeFlashloan(address[],uint256[],bytes,bool)", _tokens, _amounts, _flashLoanData, false
         );
 
         proxy.execute(address(neo), _proxyData);
@@ -219,7 +219,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -238,7 +238,7 @@ contract AaveV2Test is BaseTest {
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](3));
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         (,, uint256 _totalBorrowed) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentBorrowBalanceInOf(_poolToken, _proxy);
@@ -252,7 +252,7 @@ contract AaveV2Test is BaseTest {
         address _proxy = address(proxy);
         // Supply _userData.
         address _market = Constants._MORPHO_AAVE;
-        address _poolToken = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e; // WETH Market
+        address _poolToken = _WETH_MARKET;
         uint256 _amount = 1e18;
 
         // Flashloan _userData.
@@ -275,7 +275,7 @@ contract AaveV2Test is BaseTest {
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](4));
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalSupplied) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         (,, uint256 _totalBorrowed) = IMorphoLens(_MORPHO_AAVE_LENS).getCurrentBorrowBalanceInOf(_poolToken, _proxy);

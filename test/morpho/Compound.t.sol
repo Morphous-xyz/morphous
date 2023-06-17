@@ -34,7 +34,7 @@ contract CompoundTest is BaseTest {
 
         bytes memory _proxyData =
             abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](2));
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
         assertApproxEqRel(_totalBalance, _amount, 1e15); // 0.1%
@@ -65,7 +65,7 @@ contract CompoundTest is BaseTest {
 
         bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
-        proxy.execute{value: _amount}(address(morpheous), _proxyData);
+        proxy.execute{value: _amount}(address(morphous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
 
