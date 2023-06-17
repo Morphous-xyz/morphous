@@ -5,7 +5,7 @@ API_URL = "https://api.0x.org/swap/v1"
 
 
 def get_quote(srcToken, dstToken, amount, side):
-    time.sleep(3)
+    time.sleep(5)
 
     queryParams = {
         "sellToken": srcToken,

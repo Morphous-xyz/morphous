@@ -8,7 +8,7 @@ ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 
 
 def get_quote(srcToken, dstToken, amount, side, receiver):
-    time.sleep(3)
+    time.sleep(5)
 
     if srcToken == ETH_ADDRESS:
         srcToken = ZERO_ADDRESS
