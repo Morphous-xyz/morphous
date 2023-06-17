@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.20;
 
-import {ERC20} from "solmate/tokens/ERC20.sol";
-import {WETH} from "solmate/tokens/WETH.sol";
-import {LibString} from "solady/utils/LibString.sol";
-
-import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {FL} from "src/FL.sol";
-import {IDSProxy} from "src/interfaces/IDSProxy.sol";
-import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {Logger} from "src/Logger.sol";
-import {MorphoModule} from "src/modules/MorphoModule.sol";
-import {Morphous, Constants} from "src/Morphous.sol";
-import {Neo, TokenUtils} from "src/Neo.sol";
-import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
-
 import {BaseTest} from "test/BaseTest.sol";
+import {Neo, TokenUtils} from "src/Neo.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
+import {LibString} from "solady/utils/LibString.sol";
+import {IDSProxy} from "src/interfaces/IDSProxy.sol";
+import {Morphous, Constants} from "src/Morphous.sol";
+import {IPoolToken} from "src/interfaces/IPoolToken.sol";
+import {MorphoModule} from "src/modules/MorphoModule.sol";
 import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
+import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
+import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 
 /// @title StrategiesTest
 /// @notice Test suite for strategies (leverage and deleverage)
@@ -58,7 +56,6 @@ contract StrategiesV2Test is BaseTest {
         assertEq(_totalBorrowed, 0);
 
         assertEq(TokenUtils._balanceInOf(Constants._WETH, _proxy), 0);
-
         assertGt(TokenUtils._balanceInOf(Constants._WETH, address(this)), _amount - 1e16);
     }
 

@@ -13,9 +13,9 @@ import {LibString} from "solady/utils/LibString.sol";
 import {IDSProxy} from "src/interfaces/IDSProxy.sol";
 import {IPoolToken} from "src/interfaces/IPoolToken.sol";
 import {MorphoModule} from "src/modules/MorphoModule.sol";
+import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
-import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
 interface PoolConfigurator {
     function setSupplyCap(address asset, uint256 supplyCap) external;
