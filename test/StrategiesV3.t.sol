@@ -17,11 +17,21 @@ import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
+interface SupplyCaps {
+    function setSupplyCap(address asset, uint256 supplyCap) external;
+}
+
 /// @title StrategiesTest
 /// @notice Test suite for strategies (leverage and deleverage)
 contract StrategiesV3Test is BaseTest {
+
+    uint256 internal constant MAX_VALID_SUPPLY_CAP = 68719476735;
+    address internal constant EXECUTOR = 0xEE56e2B3D491590B5b31738cC34d5232F378a8D5;
+    address internal constant POOL_CONFIGURATOR = 0x64b761D848206f447Fe2dd461b0c635Ec39EbB27;
+
     function setUp() public override {
-        vm.rollFork(17174536); // Block number with Supply Cap not reached for wsETH.
+        vm.prank(EXECUTOR);
+        SupplyCaps(POOL_CONFIGURATOR).setSupplyCap(Constants._wstETH, MAX_VALID_SUPPLY_CAP);
 
         super.setUp();
     }
