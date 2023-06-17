@@ -17,7 +17,7 @@ import {AggregatorsModule} from "src/modules/AggregatorsModule.sol";
 import {TokenActionsModule} from "src/modules/TokenActionsModule.sol";
 import {IMorphoLens} from "test/interfaces/IMorphoLens.sol";
 
-interface SupplyCaps {
+interface PoolConfigurator {
     function setSupplyCap(address asset, uint256 supplyCap) external;
 }
 
@@ -30,7 +30,7 @@ contract StrategiesV3Test is BaseTest {
 
     function setUp() public override {
         vm.prank(EXECUTOR);
-        SupplyCaps(POOL_CONFIGURATOR).setSupplyCap(Constants._wstETH, MAX_VALID_SUPPLY_CAP);
+        PoolConfigurator(POOL_CONFIGURATOR).setSupplyCap(Constants._wstETH, MAX_VALID_SUPPLY_CAP);
 
         super.setUp();
     }
