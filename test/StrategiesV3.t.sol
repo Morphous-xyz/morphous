@@ -82,7 +82,7 @@ contract StrategiesV3Test is BaseTest {
         _calldata[3] = abi.encode(
             _MORPHO_MODULE,
             abi.encodeWithSignature(
-                "supplyCollateral(address,uint256,address)", _supplyToken, _amount + _toFlashloan, _proxy
+                "supplyCollateral(address,uint256,address)", _supplyToken, type(uint256).max, _proxy
             )
         );
         _calldata[4] = abi.encode(
@@ -96,10 +96,7 @@ contract StrategiesV3Test is BaseTest {
             abi.encodeWithSignature("transfer(address,address,uint256)", _borrowToken, address(fl), _toFlashloan)
         );
 
-        uint256[] memory _argPos = new uint256[](6);
-        _argPos[3] = 4 + 32;
-
-        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata, _argPos);
+        bytes memory _flashLoanData = abi.encode(_proxy, block.timestamp + 15, _calldata);
 
         // Flashloan functions parameters.
         address[] memory _tokens = new address[](1);

@@ -54,15 +54,14 @@ contract FL is ReentrancyGuard, IFlashLoanRecipient {
     ) external override nonReentrant {
         if (msg.sender != Constants._BALANCER_VAULT) revert Constants.INVALID_LENDER();
 
-        (address proxy, uint256 deadline, bytes[] memory data, uint256[] memory argPos) =
-            abi.decode(_userData, (address, uint256, bytes[], uint256[]));
+        (address proxy, uint256 deadline, bytes[] memory data) = abi.decode(_userData, (address, uint256, bytes[]));
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             TokenUtils._transfer(_tokens[i], proxy, _amounts[i]);
         }
 
         IDSProxy(proxy).execute{value: address(this).balance}(
-            MORPHOUS, abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", deadline, data, argPos)
+            MORPHOUS, abi.encodeWithSignature("multicall(uint256,bytes[])", deadline, data)
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -88,15 +87,14 @@ contract FL is ReentrancyGuard, IFlashLoanRecipient {
         if (_initiator != address(this)) revert Constants.INVALID_INITIATOR();
         if (msg.sender != Constants._AAVE_LENDING_POOL) revert Constants.INVALID_LENDER();
 
-        (address proxy, uint256 deadline, bytes[] memory data, uint256[] memory argPos) =
-            abi.decode(_userData, (address, uint256, bytes[], uint256[]));
+        (address proxy, uint256 deadline, bytes[] memory data) = abi.decode(_userData, (address, uint256, bytes[]));
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             TokenUtils._transfer(_tokens[i], proxy, _amounts[i]);
         }
 
         IDSProxy(proxy).execute{value: address(this).balance}(
-            MORPHOUS, abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", deadline, data, argPos)
+            MORPHOUS, abi.encodeWithSignature("multicall(uint256,bytes[])", deadline, data)
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {

@@ -38,10 +38,7 @@ contract AggregatorsTest is BaseTest {
             )
         );
 
-        uint256[] memory _argPos = new uint256[](1);
-
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
@@ -70,11 +67,7 @@ contract AggregatorsTest is BaseTest {
             abi.encodeWithSignature("supply(address,address,address,uint256)", _market, _poolToken, proxy, quote)
         );
 
-        uint256[] memory _argPos = new uint256[](2);
-        _argPos[1] = 4 + 96; // 4 for sig + 4th arguments starts at 96 bytes. (3 * 32 bytes)
-
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 

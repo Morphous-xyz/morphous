@@ -33,7 +33,7 @@ contract CompoundTest is BaseTest {
         );
 
         bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](2));
+            abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](2));
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         (,, uint256 _totalBalance) = IMorphoLens(_MORPHO_COMPOUND_LENS).getCurrentSupplyBalanceInOf(_poolToken, _proxy);
@@ -63,9 +63,7 @@ contract CompoundTest is BaseTest {
         );
         _calldata[3] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
-        uint256[] memory _argPos = new uint256[](4);
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
 
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 

@@ -24,9 +24,8 @@ contract FlashloanTest is BaseTest {
             _TOKEN_ACTIONS_MODULE,
             abi.encodeWithSignature("transfer(address,address,uint256)", _DAI, address(fl), _amount)
         );
-        uint256[] memory _argPos = new uint256[](1);
 
-        bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata, _argPos);
+        bytes memory _flashLoanData = abi.encode(_proxy, _deadline, _calldata);
 
         // Flashloan functions parameters.
         address[] memory _tokens = new address[](1);

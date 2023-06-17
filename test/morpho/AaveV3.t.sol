@@ -39,10 +39,7 @@ contract AaveV3Test is BaseTest {
             abi.encodeWithSignature("supply(address,uint256,address,uint256)", _token, _amount, _proxy, 4)
         );
 
-        uint256[] memory _argPos = new uint256[](2);
-
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         uint256 _totalBalance = IMorphoLens(Constants._MORPHO_AAVE_V3).supplyBalance(_token, _proxy);
@@ -73,7 +70,7 @@ contract AaveV3Test is BaseTest {
         _calldata[3] = abi.encode(_TOKEN_ACTIONS_MODULE, abi.encodeWithSignature("withdrawWETH(uint256)", _amount));
 
         bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, new uint256[](4));
+            abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata, new uint256[](4));
 
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
@@ -109,10 +106,7 @@ contract AaveV3Test is BaseTest {
             abi.encodeWithSignature("borrow(address,uint256,address,address,uint256)", _token, 1e18, _proxy, _proxy, 4)
         );
 
-        uint256[] memory _argPos = new uint256[](3);
-
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", _deadline, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", _deadline, _calldata);
         proxy.execute{value: _amount}(address(morpheous), _proxyData);
 
         uint256 _totalBorrowed = IMorphoLens(Constants._MORPHO_AAVE_V3).borrowBalance(_token, _proxy);

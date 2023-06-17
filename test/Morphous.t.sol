@@ -69,11 +69,8 @@ contract MorphousTest is BaseTest {
         _calldata[0] = abi.encode(identifierA, abi.encodeWithSignature("A(uint256)", 1));
         _calldata[1] = abi.encode(identifierB, abi.encodeWithSignature("B(uint256)", 2));
 
-        uint256[] memory _argPos = new uint256[](2);
-
         // Execute multicall via DsProxy (using a delegatecall)
-        bytes memory _proxyData =
-            abi.encodeWithSignature("multicall(uint256,bytes[],uint256[])", block.timestamp + 15, _calldata, _argPos);
+        bytes memory _proxyData = abi.encodeWithSignature("multicall(uint256,bytes[])", block.timestamp + 15, _calldata);
 
         // Check that the modules were called correctly
         vm.expectEmit(true, true, true, true);

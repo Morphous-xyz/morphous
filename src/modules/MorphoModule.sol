@@ -185,6 +185,10 @@ contract MorphoModule is BaseModule {
     {
         address _token = _getToken(_market, _poolToken);
 
+        if (_amount == type(uint256).max) {
+            _amount = TokenUtils._balanceInOf(_token, address(this));
+        }
+
         TokenUtils._approve(_token, _market, _amount);
 
         IMorpho(_market).supply(_poolToken, _onBehalf, _amount);
@@ -203,6 +207,10 @@ contract MorphoModule is BaseModule {
         onlyValidMarket(_market)
     {
         address _token = _getToken(_market, _poolToken);
+
+        if (_amount == type(uint256).max) {
+            _amount = TokenUtils._balanceInOf(_token, address(this));
+        }
 
         TokenUtils._approve(_token, _market, _amount);
         IMorpho(_market).supply(_poolToken, _onBehalf, _amount, _maxGasForMatching);
@@ -230,6 +238,10 @@ contract MorphoModule is BaseModule {
     /// @param onBehalf The address to supply on behalf of.
     /// @param maxIterations The number of iterations for the supply operation.
     function supply(address underlying, uint256 amount, address onBehalf, uint256 maxIterations) external {
+        if (amount == type(uint256).max) {
+            amount = TokenUtils._balanceInOf(underlying, address(this));
+        }
+
         TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
         IMorpho(Constants._MORPHO_AAVE_V3).supply(underlying, amount, onBehalf, maxIterations);
 
@@ -241,6 +253,9 @@ contract MorphoModule is BaseModule {
     /// @param amount The amount to supply.
     /// @param onBehalf The address to supply on behalf of.
     function supplyCollateral(address underlying, uint256 amount, address onBehalf) external {
+        if (amount == type(uint256).max) {
+            amount = TokenUtils._balanceInOf(underlying, address(this));
+        }
         TokenUtils._approve(underlying, Constants._MORPHO_AAVE_V3, amount);
         IMorpho(Constants._MORPHO_AAVE_V3).supplyCollateral(underlying, amount, onBehalf);
 
